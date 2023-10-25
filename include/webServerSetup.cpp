@@ -158,6 +158,9 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
       Heltec.display->display();
       notifyClients();
     }
+    if (strcmp((char*)data, "getMessage") == 0) {
+      notifyClients();
+    }
   }
 }
 
