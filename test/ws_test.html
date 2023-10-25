@@ -1,0 +1,62 @@
+<!DOCTYPE HTML><html>
+
+<head>
+    <link rel="stylesheet" href="/esplockstyle.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <h1>ESP32 Web Server</h1>
+    <h2> LED </h2>
+    <p><button id="ButtonLED" class="button button2">%STATE%</button></p>
+    <h2> Display </h2>\
+    <p><button id="ButtonDisplay" class="button button2">%STATE%</button></p>\
+    <h2> Firmware Update </h2>\
+    <p><a href="/update"><button class="button button3">OTA</button></a></p>
+
+    <script>
+      var gateway = `ws://${window.location.hostname}/ws`;
+      var websocket;
+      window.addEventListener('load', onLoad);
+      function initWebSocket() {
+        console.log('Trying to open a WebSocket connection...');
+        websocket = new WebSocket(gateway);
+        websocket.onopen    = onOpen;
+        websocket.onclose   = onClose;
+        websocket.onmessage = onMessage; // <-- add this line
+      }
+      function onOpen(event) {
+        console.log('Connection opened');
+      }
+      function onClose(event) {
+        console.log('Connection closed');
+        setTimeout(initWebSocket, 2000);
+      }
+      function onMessage(event) {
+        var state;
+        if (event.data == "1"){
+          state = "ON";
+        }
+        else{
+          state = "OFF";
+        }
+        document.getElementById('ButtonLED').innerHTML = state;
+      }
+      function onLoad(event) {
+        initWebSocket();
+        initButton();
+      }
+      function initButton() {
+        document.getElementById('ButtonLED').addEventListener('click', toggleLed);
+        document.getElementById('ButtonDisplay').addEventListener('click', toggleDisplay);
+      }
+      function toggleLed(){
+        websocket.send('toggleLED');
+      }
+    function toggleDisplay(){
+        websocket.send('toggleDisplay');
+      }
+    </script>
+
+</body>
+</html>
