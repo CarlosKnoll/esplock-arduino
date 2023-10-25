@@ -65,6 +65,12 @@ void setupWebPages(){
   server.on("/wsHandler.js", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/wsHandler.js", "text/javascript");
   });
+  server.on("/data.json", HTTP_POST, [](AsyncWebServerRequest *request) {
+    request->send(SPIFFS, "/data.json", "application/json");
+  });
+  server.on("/userdataHandler.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(SPIFFS, "/userdataHandler.js", "text/javascript");
+  });
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(200, "text/html", "<meta http-equiv=\"refresh\" content=\"0; URL='./main'\"/>");
   });
