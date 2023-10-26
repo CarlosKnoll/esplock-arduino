@@ -92,6 +92,9 @@ void setupWebPages(){
   server.on("/remove", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", "remover usuario");
   }); 
+  server.on("/novouser", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send(200, "text/plain", "adicionar usuario");
+  }); 
 
 
 

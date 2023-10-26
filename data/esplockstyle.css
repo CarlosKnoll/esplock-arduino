@@ -7,6 +7,7 @@ html {
 html, th, td{
     text-align: center;
     font-size:2vw;
+    color: black;
 }
 
 td{
@@ -21,13 +22,52 @@ table{
 }
 
 td:last-child {
-  border :none;
+    border :none;
 }
+
+.table tr.spacer > td {
+    border: none;
+    padding: 0
+  }
+
+tr.lastRow>td {
+    color: #cecece;
+    font-size: 2vw;
+  }
 
 .table-container{
     display: inline-block;
 }
 
+input[type=text] {
+    text-align: center;
+    justify-content: center;
+    display: table-cell;
+    width: 30vw;
+    font-size: 4vw;
+    border: solid #727272;
+    margin: 8px 0;
+    box-sizing: border-box;
+}
+
+input[type=text]:focus {
+    border: solid #000000;
+}
+
+form>p {
+    display: inline;
+    text-align: center;
+    justify-content: center;
+}
+
+
+label{
+    width: 20vw;
+    font-size: 4vw;
+    display: table-cell;
+    text-align: center;
+    justify-content: center;
+}
 
 .button-container{
     display: inline-block;
@@ -74,3 +114,17 @@ td:last-child {
 }
 .button4:hover { background-color: #f7a099; }
 
+.button5 {
+    width: 6vw;
+    top: 20px;
+    border-radius: 0px;
+    color: white;
+    padding: 3px;
+    font-size: 2vw;
+    margin: 0px;
+    outline: none;
+    cursor: pointer;
+    background-color: #4CAF50;
+}
+
+.button5:hover { background-color: #7cdf80; }

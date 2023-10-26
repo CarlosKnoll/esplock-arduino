@@ -21,13 +21,23 @@ table{
 }
 
 td:last-child {
-  border :none;
+    border :none;
+}
+
+tr:last-child {
+    color: #f00000;
+    font-size: 1vw;
+    border-spacing: 0 2px;
 }
 
 .table-container{
     display: inline-block;
 }
 
+.faded-text{
+    color: #cecece;
+    font-size: 1.5vw;
+}
 
 .button-container{
     display: inline-block;
@@ -73,4 +83,19 @@ td:last-child {
     background-color: #eb4034;
 }
 .button4:hover { background-color: #f7a099; }
+
+.button5 {
+    width: 6vw;
+    top: 20px;
+    border-radius: 0px;
+    color: white;
+    padding: 3px;
+    font-size: 2vw;
+    margin: 0px;
+    outline: none;
+    cursor: pointer;
+    background-color: #3ef307;
+}
+
+.button5:hover { background-color: #a4f18d; }
 

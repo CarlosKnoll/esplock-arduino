@@ -39,18 +39,22 @@
 #include <SPIFFS.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncElegantOTA.h>
-#include <iostream>
-#include <string>
+#include <SPI.h>
+#include <MFRC522.h>
+#include <ArduinoJson.h>
 
 // -----------------------------------------------
 // Function prototypes
 
 void printMessage( String string2print );
+void jsonHandler( String idTag );
 
 // -----------------------------------------------
 
 #include "webServerSetup.cpp"
 #include "heltecDisplay.cpp"
+#include "rfidSetup.cpp"
+#include "jsonHandler.cpp"
 
 // -----------------------------------------------
 
@@ -88,8 +92,12 @@ void setup(void)
     Serial.begin(115200);
     SPIFFS.begin(true);
     Heltec.begin(true /*DisplayEnable Enable*/, false /*LoRa Disable*/, true /*Serial Enable*/);
+    setupRFID();
+
     pinMode(led, OUTPUT);
+
     msgEspLock1();
+
     setupAP();
     setupOTAasync();
     setupWebPages();
@@ -104,4 +112,5 @@ void setup(void)
 void loop(void)
 {
     //server.handleClient();
+    checkCard();
 }
