@@ -4,7 +4,7 @@
 // const char* host = "esp32";
 const char *ssid;
 const char *password;
-String ip;
+String ipMsg;
 
 size_t content_len;
 
@@ -54,18 +54,21 @@ String processor(const String& var){
 
 // ------------------------------------------------------------------
 
-void printIP( String string2print ){
-  printMessage(string2print);
+void printIP(){
+  printMessage(ipMsg);
 }
 
 void setupWebPages(){
   server.on("/esplockstyle.css", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/esplockstyle.css", "text/css");
   });
-  server.on("/wsHandler.js", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/wsHandler.js", "text/javascript");
+  server.on("/testHandler.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(SPIFFS, "/testHandler.js", "text/javascript");
   });
   server.on("/data.json", HTTP_POST, [](AsyncWebServerRequest *request) {
+    request->send(SPIFFS, "/data.json", "application/json");
+  });
+  server.on("/data.json", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/data.json", "application/json");
   });
   server.on("/userdataHandler.js", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -93,7 +96,7 @@ void setupWebPages(){
       request->send(200, "text/plain", "remover usuario");
   }); 
   server.on("/novouser", HTTP_GET, [](AsyncWebServerRequest *request){
-      request->send(200, "text/plain", "adicionar usuario");
+      request->send(SPIFFS, "/esplockNewUser.html", "text/html");
   }); 
 
 
@@ -121,9 +124,9 @@ void setupAP(){
   Serial.print("AP IP address: ");
   Serial.println(IP);
 
-  ip = IP.toString();
-  string2print = "Success! " + ip;
-  printIP( string2print );
+  String ip = IP.toString();
+  ipMsg = "Success! " + ip;
+  printIP();
   
 }
 
@@ -139,11 +142,15 @@ void beginServer(){
 }
 
 // -----------------------------------------------
-// Websocket handler
+// Websockets handler
 // -----------------------------------------------
 
-void notifyClients() {
+void notifyClientstest() {
   ws.textAll(String (ledState) + String (displayState));
+}
+
+void notifyUsersTable( int response){
+  ws.textAll(String (response));
 }
 
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
@@ -153,22 +160,28 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
     if (strcmp((char*)data, "toggleLED") == 0) {
       ledState = !ledState;
       digitalWrite(led, ledState);
-      notifyClients();
+      notifyClientstest();
     }
     if (strcmp((char*)data, "toggleDisplay") == 0) {
       displayState = !displayState;
       Heltec.display->clear();
       if (displayState == LOW){
-        printIP("Success! " + ip);
+        printIP();
       }
       if (displayState == HIGH){
         Heltec.display->drawXbm(34, 14, bird_width, bird_height, bird_bits);
       }
       Heltec.display->display();
-      notifyClients();
+      notifyClientstest();
     }
     if (strcmp((char*)data, "getMessage") == 0) {
-      notifyClients();
+      notifyClientstest();
+    }
+    if (strstr((char*)data, "removeUser") != NULL) {
+      String message = (char*)data;
+      Serial.println("Got the following message data: " + message);
+      int response = removeUser(message.substring(11).toInt());
+      notifyUsersTable(response);
     }
   }
 }

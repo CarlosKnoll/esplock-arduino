@@ -42,12 +42,15 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #include <ArduinoJson.h>
+#include <cstring>
 
 // -----------------------------------------------
 // Function prototypes
 
 void printMessage( String string2print );
 void jsonHandler( String idTag );
+void printIP();
+int removeUser( int idDelete );
 
 // -----------------------------------------------
 
@@ -105,7 +108,7 @@ void setup(void)
     beginServer();
 
     Serial.println("HTTP server started");
-    ipString = "Success! " + ip;
+    ipString = "Success! " + ipMsg;
 }
 
 // -----------------------------------------------

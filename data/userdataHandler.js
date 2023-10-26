@@ -1,9 +1,41 @@
-//first add an event listener for page load
-document.addEventListener( "DOMContentLoaded", get_json_data, false ); // get_json_data is the function name that will fire on page load
+var gateway = `ws://${window.location.hostname}/ws`;
+var websocket;
+
+window.addEventListener('load', onLoad);
+
+function onLoad(event) {
+    initWebSocket();
+    initButton();
+}
+
+function initWebSocket() {
+    console.log('Trying to open a WebSocket connection...');
+    websocket = new WebSocket(gateway);
+    websocket.onopen    = onOpen;
+    websocket.onclose   = onClose;
+    websocket.onmessage = onMessage;
+}
+function onOpen(event) {
+    get_json_data();
+}
+
+function onClose(event) {
+    console.log('Connection closed');
+    setTimeout(initWebSocket, 2000);
+}
+function onMessage(event) {
+    console.log(event.data);
+    var id = event.data;
+    document.getElementById(id).remove();
+}
+
+function removeUser(event){
+    websocket.send('removeUser=' + event.target.parentElement.parentElement.id);
+    console.log( event.target.parentElement.parentElement.id );
+  }
 
 //this function is in the event listener and will execute on page load
 function get_json_data(){
-    console.log('get_json function fired')
     // Relative URL of external json file
     var json_url = '/data.json';
 
@@ -13,6 +45,7 @@ function get_json_data(){
         if (this.readyState == 4 && this.status == 200) {//when a good response is given do this
             // append_titles();
             var data = JSON.parse(this.responseText); // convert the response to a json object
+            console.log(data)
             append_json(data);// pass the json object to the append_json function
             append_addUser();
         }
@@ -25,23 +58,20 @@ function get_json_data(){
     xmlhttp.send(); // when the request completes it will execute the code in onreadystatechange section
 }
 
-// function append_titles(){
-//     var table = document.getElementById('usersTable');
-//     var tr = document.createElement('tr');
-//     tr.innerHTML = '<td colspan="2">(Adicionar usuário)</td>' + 
-//     '<td><a href="/novouser"><button class="button button5">+</button></td>'
-//     table.appendChild(tr);
-// }
-
 //this function appends the json data to the table 'gable'
 function append_json(data){
     var table = document.getElementById('usersTable');
-    data.forEach(function(object) {
+    var elemCount = 0;
+    data.credentials.forEach(function(object) {
+        console.log(object)
         var tr = document.createElement('tr');
+        tr.id = elemCount;
         tr.innerHTML = '<td>' + object.name + '</td>' +
         '<td>' + object.tag + '</td>' +
-        '<td><a href="/remove"><button class="button button4">X</button></a></td>';
+        '<td><button id="remove' + elemCount + '" class="button button4">X</button></a></td>';
         table.appendChild(tr);
+        document.getElementById('remove' + elemCount).addEventListener('click', removeUser);
+        elemCount++;
     });
 }
 
