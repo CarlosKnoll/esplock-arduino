@@ -1,9 +1,20 @@
+DynamicJsonDocument document(1300);
+
+void readJSON(){
+    File dados = SPIFFS.open("/data.json", "r+");   //Open JSON file
+    deserializeJson(document, dados);               //Deserialize file into document object
+    dados.close();                                  //Close file
+}
+
+void writeJSON(){
+    File dados = SPIFFS.open("/data.json", "w+");   //Open JSON file -> w+ mode means truncate file
+    serializeJsonPretty(document, dados);           //Serialize document object data back into JSON file
+    dados.close();                                  //Close file
+}
+
 void jsonHandler(String idTag){
     int checkCadastro = 0;
-    // Open file
-    File dados = SPIFFS.open("/data.json");
-    DynamicJsonDocument document(1300);
-    deserializeJson(document, dados);
+    readJSON();
     JsonArray array = document["credentials"];
     //serializeJson(array, Serial);
 
@@ -16,28 +27,29 @@ void jsonHandler(String idTag){
             checkCadastro = 1;
             break;
         }
-
     }  
     if (checkCadastro == 0){
         Serial.print("Usuário não cadastrado");
         printMessage("Usuário não cadastrado");
     }
-    dados.close();
 }
 
 int removeUser(int idDelete){
-    File dados = SPIFFS.open("/data.json", "r+");
-    DynamicJsonDocument document(1300);
-
-    deserializeJson(document, dados);
-
+    readJSON();
     JsonArray array = document["credentials"];
     //serializeJson(array, Serial);
     array.remove(idDelete);
-    dados.close();
-
-    File dadosW = SPIFFS.open("/data.json", "w+");
-    serializeJsonPretty(document, dadosW);
-    dados.close();
+    writeJSON();
     return idDelete; 
+}
+
+void addUser( String usuario, String tag ){
+    readJSON();
+    JsonArray array = document["credentials"];
+    //serializeJson(array, Serial);
+    JsonObject newUser = array.createNestedObject();
+    newUser["name"] = usuario;
+    newUser["tag"] = tag;
+    serializeJson(document, Serial);
+    writeJSON();
 }

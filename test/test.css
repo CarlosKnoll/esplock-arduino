@@ -7,6 +7,7 @@ html {
 html, th, td{
     text-align: center;
     font-size:2vw;
+    color: black;
 }
 
 td{
@@ -24,19 +25,48 @@ td:last-child {
     border :none;
 }
 
-tr:last-child {
-    color: #f00000;
-    font-size: 1vw;
-    border-spacing: 0 2px;
-}
+.table tr.spacer > td {
+    border: none;
+    padding: 0
+  }
+
+tr.lastRow>td {
+    color: #cecece;
+    font-size: 2vw;
+  }
 
 .table-container{
     display: inline-block;
 }
 
-.faded-text{
-    color: #cecece;
-    font-size: 1.5vw;
+input[type=text] {
+    text-align: center;
+    justify-content: center;
+    display: table-cell;
+    width: 30vw;
+    font-size: 4vw;
+    border: solid #727272;
+    margin: 8px 0;
+    box-sizing: border-box;
+}
+
+input[type=text]:focus {
+    border: solid #000000;
+}
+
+form>p {
+    display: inline;
+    text-align: center;
+    justify-content: center;
+}
+
+
+label{
+    width: 20vw;
+    font-size: 4vw;
+    display: table-cell;
+    text-align: center;
+    justify-content: center;
 }
 
 .button-container{
@@ -94,8 +124,7 @@ tr:last-child {
     margin: 0px;
     outline: none;
     cursor: pointer;
-    background-color: #3ef307;
+    background-color: #4CAF50;
 }
 
-.button5:hover { background-color: #a4f18d; }
-
+.button5:hover { background-color: #7cdf80; }

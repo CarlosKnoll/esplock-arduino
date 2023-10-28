@@ -1,31 +1,33 @@
+<!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" href="esplockstyle.css">
+        <link rel="stylesheet" href="test.css">
+        <script src='test.js'></script>
         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-        <script src='/addUser.js'></script>
         <meta charset="UTF-8">
     </head>
     <body>
         <h1>ESPLOCK</h1>
         <h2>Adicionar novo usuário</h2>
-            <form id="newData" onsubmit="sendInfo(event)">
-                <p>
+            <form id="newData" onsubmit="test(event); return false">
+              <p>
                 <label for="user">Usuário: </label>
                 <input type="text" id="user" name="fname"><br><br>
-                </p>
-                <p>
+              </p>
+              <p>
                 <label for="tag">ID: </label>
                 <input type="text" id="tag" name="lname"><br><br>
-                </p>
+              </p>
             </form>
             <p>
-                <button id="RFID" class="button buttonRfid">Ler TAG RFID</button>
+              <button onclick="getRFID()" class="button">Ler TAG RFID</button>
             </p>
             <div class="button-container">
-                <button type="submit" form="newData" class="button">Adicionar</button></a>
+              <!-- <a href="/usuarios"> -->
+              <button type="submit" form="newData" class="button">OK</button></a>
             </div>
             <div class="button-container">
-                <a href="/usuarios"><button class="button button3">Retornar</button></a>         
+              <a href="/usuarios"><button class="button button3">Cancelar</button></a>         
             </div>
     </body>
 </html>

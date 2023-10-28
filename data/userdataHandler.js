@@ -5,7 +5,6 @@ window.addEventListener('load', onLoad);
 
 function onLoad(event) {
     initWebSocket();
-    initButton();
 }
 
 function initWebSocket() {
@@ -23,10 +22,18 @@ function onClose(event) {
     console.log('Connection closed');
     setTimeout(initWebSocket, 2000);
 }
+
 function onMessage(event) {
-    console.log(event.data);
-    var id = event.data;
-    document.getElementById(id).remove();
+    if (event.data == "redoTable"){
+        var Table = document.getElementById("usersTable");
+        Table.innerHTML = "";
+        get_json_data();
+    }
+    else{
+        console.log(event.data);
+        var id = event.data;
+        document.getElementById(id).remove();
+    }
 }
 
 function removeUser(event){

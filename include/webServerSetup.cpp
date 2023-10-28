@@ -58,36 +58,51 @@ void printIP(){
   printMessage(ipMsg);
 }
 
+// ------------------------------------------------------------------
+// Setup every webpage/file requests
+// ------------------------------------------------------------------
 void setupWebPages(){
+  // General files
   server.on("/esplockstyle.css", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/esplockstyle.css", "text/css");
-  });
-  server.on("/testHandler.js", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/testHandler.js", "text/javascript");
+    request->send(SPIFFS, "/esplockstyle.css", "text/css"); //css for html elements
   });
   server.on("/data.json", HTTP_POST, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/data.json", "application/json");
+    request->send(SPIFFS, "/data.json", "application/json"); //post for modification of data file
   });
   server.on("/data.json", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/data.json", "application/json");
+    request->send(SPIFFS, "/data.json", "application/json"); //get for data file -debug purposes-
   });
-  server.on("/userdataHandler.js", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/userdataHandler.js", "text/javascript");
-  });
+
+  // Main webpage
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "text/html", "<meta http-equiv=\"refresh\" content=\"0; URL='./main'\"/>");
+    request->send(200, "text/html", "<meta http-equiv=\"refresh\" content=\"0; URL='./main'\"/>"); // Redirect of root to /main
   });
   server.on("/main", HTTP_GET, [](AsyncWebServerRequest *request){
-      request->send(SPIFFS, "/esplockMain.html", "text/html");
+      request->send(SPIFFS, "/esplockMain.html", "text/html"); //webpage HTML
   }); 
+
+  // Users webpage
+  server.on("/usuarios", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send(SPIFFS, "/esplockUsers.html" ,"text/html"); //webpage HTML
+  }); 
+  server.on("/userdataHandler.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(SPIFFS, "/userdataHandler.js", "text/javascript"); //webpage javascript
+  });
+
+  // Add new users webpage
+  server.on("/novouser", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send(SPIFFS, "/esplockNewUser.html", "text/html"); //webpage HTML
+  }); 
+  server.on("/addUser.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(SPIFFS, "/addUser.js", "text/javascript"); //webpage javascript
+  });
+
+  // Placeholder for future webpages/functionalities
   server.on("/acessos", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", "acessos");
   }); 
   server.on("/entrada", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", "entrada");
-  }); 
-  server.on("/usuarios", HTTP_GET, [](AsyncWebServerRequest *request){
-      request->send(SPIFFS, "/esplockUsers.html" ,"text/html");
   }); 
   server.on("/saida", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", "saida");
@@ -95,16 +110,17 @@ void setupWebPages(){
   server.on("/remove", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", "remover usuario");
   }); 
-  server.on("/novouser", HTTP_GET, [](AsyncWebServerRequest *request){
-      request->send(SPIFFS, "/esplockNewUser.html", "text/html");
-  }); 
 
-
-
+  // Test webpage
   server.on("/test", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(SPIFFS, "/test.html", "text/html", false, processor);
+    request->send(SPIFFS, "/test.html", "text/html", false, processor); //webpage HTML
+  });
+  server.on("/testHandler.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(SPIFFS, "/testHandler.js", "text/javascript"); //webpage javascript
   });
 }
+
+
 
 // ------------------------------------------------------------------
 // Setup as AP
@@ -145,24 +161,37 @@ void beginServer(){
 // Websockets handler
 // -----------------------------------------------
 
-void notifyClientstest() {
+// Send responses to client-side javascript
+void notifyClientstest() { //Sends back status of led/display (test webpage)
   ws.textAll(String (ledState) + String (displayState));
 }
 
-void notifyUsersTable( int response){
+void notifyRemoveTable( int response){ //Sends back id of row to be removed from html (users webpage)
   ws.textAll(String (response));
 }
 
+void notifyUsersTable(){
+  ws.textAll("redoTable");
+}
+
+void notifyRFID(String uid){
+  Serial.println("Notifying rfid");
+  ws.textAll(uid);
+}
+
+// Handler
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
     data[len] = 0;
-    if (strcmp((char*)data, "toggleLED") == 0) {
+
+    //Test for messages from test webpage
+    if (strcmp((char*)data, "toggleLED") == 0) { //If message = toggleLED
       ledState = !ledState;
       digitalWrite(led, ledState);
       notifyClientstest();
     }
-    if (strcmp((char*)data, "toggleDisplay") == 0) {
+    if (strcmp((char*)data, "toggleDisplay") == 0) { //If message = toggleDisplay
       displayState = !displayState;
       Heltec.display->clear();
       if (displayState == LOW){
@@ -174,14 +203,32 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
       Heltec.display->display();
       notifyClientstest();
     }
-    if (strcmp((char*)data, "getMessage") == 0) {
+    if (strcmp((char*)data, "getMessage") == 0) { //If message = getMessage
       notifyClientstest();
     }
-    if (strstr((char*)data, "removeUser") != NULL) {
+
+    //Test for messages from users webpage
+    if (strstr((char*)data, "removeUser") != NULL) { //If message contains removeUser
       String message = (char*)data;
       Serial.println("Got the following message data: " + message);
       int response = removeUser(message.substring(11).toInt());
-      notifyUsersTable(response);
+      notifyRemoveTable(response);
+    }
+
+    //Test for messages from add new users webpage
+    if (strstr((char*)data, "addUser") != NULL) { //If message contains addUser
+      String message = (char*)data;
+      Serial.println("Got the following message data: " + message);
+      String newUser = message.substring(message.indexOf("User=") + 5, message.indexOf("ID=") - 1);
+      String newID = message.substring(message.indexOf("ID=") + 3);
+      addUser(newUser, newID);
+      notifyUsersTable();
+    }
+    if (strcmp((char*)data, "readRFID") == 0) { //If message = readRFID
+    Serial.println("Understood rfid message");
+      String uid = newCard();
+      Serial.println("uid string: " + uid);
+      notifyRFID(uid);
     }
   }
 }

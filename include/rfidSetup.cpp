@@ -28,8 +28,6 @@ void checkCard(){
     id = "";
     // Look for new cards
 	if ( ! mfrc522.PICC_IsNewCardPresent()) {
-    //Serial.println(F("Looking ... "));
-    //delay(1000);
         digitalWrite(led, LOW);
 		return;
 	}
@@ -44,22 +42,25 @@ void checkCard(){
     }
     printHex(mfrc522.uid.uidByte, mfrc522.uid.size);
 
-    // if (data.contains(id))
-    // {
-    //     Serial.print("it is found")
-    // }
-    // else
-    // {
-    //     Serial.print("it is not found")
-    // }
-
-    Serial.print("TAG lida:" + id);
-    Serial.println();
+    Serial.println("TAG lida:" + id);
     digitalWrite(led, HIGH);
     jsonHandler(id);
-    //Serial.print(data);
 
-    Serial.println();
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
+}
+
+String newCard(){
+    id = "";
+    Serial.println("Got into newCard()");
+    for (byte i = 0; i < 4; i++) {
+        UID[i] = mfrc522.uid.uidByte[i];
+    }
+    printHex(mfrc522.uid.uidByte, mfrc522.uid.size);
+
+    Serial.println("TAG lida:" + id);
+    digitalWrite(led, HIGH);
+    mfrc522.PICC_HaltA();
+    mfrc522.PCD_StopCrypto1();
+    return id;
 }

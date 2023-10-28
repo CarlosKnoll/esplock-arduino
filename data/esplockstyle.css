@@ -128,3 +128,11 @@ label{
 }
 
 .button5:hover { background-color: #7cdf80; }
+
+.buttonRfid {
+    background-color: #32beff;
+    width: 40vw;
+    cursor: pointer; 
+}
+
+.buttonRdid:hover { background-color: #73cbf3; }
