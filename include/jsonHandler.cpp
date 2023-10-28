@@ -43,6 +43,18 @@ int removeUser(int idDelete){
     return idDelete; 
 }
 
+int checkTag(String newTag){
+    readJSON();
+    JsonArray array = document["credentials"];
+    for (JsonObject elem : array) {
+        String tag1 = elem["tag"];
+        if (tag1 == newTag){
+            return 0;
+        }
+    } 
+    return 1;
+}
+
 void addUser( String usuario, String tag ){
     readJSON();
     JsonArray array = document["credentials"];

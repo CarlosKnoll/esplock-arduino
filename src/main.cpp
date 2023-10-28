@@ -53,6 +53,8 @@ void printIP();
 int removeUser( int idDelete );
 void addUser(String usuario, String id);
 String newCard();
+void updateStatus();
+int checkTag(String newTag);
 
 // -----------------------------------------------
 
@@ -64,11 +66,17 @@ String newCard();
 // -----------------------------------------------
 
 String ipString;
+int newUserTag = LOW;
+String newUser = "";
 
 // -----------------------------------------------
 void msgEspLock1() {
     String string2print = "        ESPLOCK       ";
     printMessage(string2print);
+}
+
+void updateStatus(){
+    newUserTag = !newUserTag;
 }
 
 // -----------------------------------------------
@@ -94,8 +102,17 @@ void setup(void)
 }
 
 // -----------------------------------------------
-void loop(void)
-{
+void loop(void){
     //server.handleClient();
-    checkCard();
+    if (newUserTag == 1){
+        newUser = newCard();
+    }
+    if (newUserTag == 0){
+        checkCard();
+    }
+    if (newUser != ""){
+        notifyRFID(newUser);
+        newUser = "";
+        updateStatus();
+    }
 }

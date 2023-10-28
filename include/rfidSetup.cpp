@@ -52,7 +52,17 @@ void checkCard(){
 
 String newCard(){
     id = "";
-    Serial.println("Got into newCard()");
+    if ( ! mfrc522.PICC_IsNewCardPresent()) {
+        digitalWrite(led, LOW);
+        return "";
+	}
+    else{
+
+	// Select one of the cards
+	if ( ! mfrc522.PICC_ReadCardSerial()) {
+		return "";
+	}
+
     for (byte i = 0; i < 4; i++) {
         UID[i] = mfrc522.uid.uidByte[i];
     }
@@ -62,5 +72,7 @@ String newCard(){
     digitalWrite(led, HIGH);
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
+
     return id;
+    }
 }

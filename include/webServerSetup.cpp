@@ -170,13 +170,17 @@ void notifyRemoveTable( int response){ //Sends back id of row to be removed from
   ws.textAll(String (response));
 }
 
-void notifyUsersTable(){
+void notifyUsersTable(){ //Notifies users at Usuarios page if new user is added
   ws.textAll("redoTable");
 }
 
 void notifyRFID(String uid){
-  Serial.println("Notifying rfid");
+  Serial.println("Notifying rfid: " + uid);
   ws.textAll(uid);
+}
+
+void notifyError(){
+  ws.textAll("unavailable");
 }
 
 // Handler
@@ -221,13 +225,22 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
       Serial.println("Got the following message data: " + message);
       String newUser = message.substring(message.indexOf("User=") + 5, message.indexOf("ID=") - 1);
       String newID = message.substring(message.indexOf("ID=") + 3);
-      addUser(newUser, newID);
-      notifyUsersTable();
+      int availableTag = checkTag(newID);
+      if (availableTag == 0){
+        notifyError();
+      }
+      else{
+        addUser(newUser, newID);
+        notifyUsersTable();
+      }
     }
-    if (strcmp((char*)data, "readRFID") == 0) { //If message = readRFID
-    Serial.println("Understood rfid message");
-      String uid = newCard();
-      Serial.println("uid string: " + uid);
+    if (strcmp((char*)data, "readRFID") == 0) { //If message = readRFID  
+      updateStatus();
+    }
+    
+    if (strcmp((char*)data, "cancelRFID") == 0) { //If message = cancelRFID
+      updateStatus();
+      String uid = "cancel";
       notifyRFID(uid);
     }
   }

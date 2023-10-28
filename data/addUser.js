@@ -1,5 +1,6 @@
 var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
+var rfidStatus = false;
 
 window.addEventListener('load', onLoad);
 
@@ -29,20 +30,39 @@ function onClose(event) {
     setTimeout(initWebSocket, 2000);
 }
 function onMessage(event) {
-    console.log(event)
-    document.getElementById('tag').value = event.data
-    document.getElementById('RFID').innerHTML = 'Ler TAG RFID'
+    console.log(event.data)
+    if (event.data != 'unavailable'){
+        if (event.data != 'cancel'){
+            document.getElementById('tag').value = event.data
+        }
+        rfidStatus = false
+        document.getElementById('RFID').innerHTML = 'Ler TAG RFID'
+        if (event.data == 'redoTable'){
+            document.getElementById('user').value = ""
+            document.getElementById('tag').value = ""
+            alert('Usuario adicionado')
+        }
+    }
+    else{
+        document.getElementById('tag').value = ""
+        alert('TAG já cadastrada')
+    }
 }
 
 function getRFID(){
-    document.getElementById('RFID').innerHTML = 'Aguardando TAG...'
-    websocket.send('readRFID')
+    rfidStatus = !rfidStatus    
+    if(rfidStatus == true){
+        document.getElementById('RFID').innerHTML = 'Aguardando TAG...'
+        websocket.send('readRFID')
+    }
+    if(rfidStatus == false){
+        websocket.send('cancelRFID')
+    }
 }
 
 function sendInfo(event){
+    console.log(event)
     var message = "addUser:User=" + event.srcElement[0].value + ";ID=" + event.srcElement[1].value
     console.log("Form submitted: User:" + event.srcElement[0].value + "; ID:" + event.srcElement[1].value)
-    console.log(event)
     websocket.send(message)
-    alert('Usuario adicionado')
 }
