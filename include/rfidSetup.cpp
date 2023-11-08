@@ -44,7 +44,7 @@ void checkCard(){
 
     Serial.println("TAG lida:" + id);
     digitalWrite(led, HIGH);
-    jsonHandler(id);
+    dbCheck(id);
 
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();

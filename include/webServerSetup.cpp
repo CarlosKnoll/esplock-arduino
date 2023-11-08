@@ -28,7 +28,6 @@ int displayState = LOW;
 #define led     25
 String msg="";
 
-#include "bmp.h"
 // ------------------------------------------------------------------
 
 String processor(const String& var){
@@ -66,11 +65,8 @@ void setupWebPages(){
   server.on("/esplockstyle.css", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/esplockstyle.css", "text/css"); //css for html elements
   });
-  server.on("/data.json", HTTP_POST, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/data.json", "application/json"); //post for modification of data file
-  });
-  server.on("/data.json", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/data.json", "application/json"); //get for data file -debug purposes-
+  server.on("/users.db", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(SPIFFS, "/users.db", "text/plain"); //users database
   });
 
   // Main webpage
@@ -110,14 +106,6 @@ void setupWebPages(){
   server.on("/remove", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", "remover usuario");
   }); 
-
-  // Test webpage
-  server.on("/test", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(SPIFFS, "/test.html", "text/html", false, processor); //webpage HTML
-  });
-  server.on("/testHandler.js", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/testHandler.js", "text/javascript"); //webpage javascript
-  });
 }
 
 
@@ -158,22 +146,18 @@ void beginServer(){
 }
 
 // -----------------------------------------------
-// Websockets handler
+// Websockets
 // -----------------------------------------------
 
 // Send responses to client-side javascript
-void notifyClientstest() { //Sends back status of led/display (test webpage)
-  ws.textAll(String (ledState) + String (displayState));
-}
 
-void notifyRemoveTable( int response){ //Sends back id of row to be removed from html (users webpage)
+// Users webpage
+void notifyUserData (String response){ //Sends back raw db data
+  Serial.println("data: " + response);
   ws.textAll(String (response));
 }
 
-void notifyUsersTable(){ //Notifies users at Usuarios page if new user is added
-  ws.textAll("redoTable");
-}
-
+// New user webpage
 void notifyRFID(String uid){
   Serial.println("Notifying rfid: " + uid);
   ws.textAll(uid);
@@ -183,40 +167,30 @@ void notifyError(){
   ws.textAll("unavailable");
 }
 
-// Handler
+void notifyNewUser(){
+  ws.textAll("clearFields");
+}
+
+// Websocket Handler
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
     data[len] = 0;
 
-    //Test for messages from test webpage
-    if (strcmp((char*)data, "toggleLED") == 0) { //If message = toggleLED
-      ledState = !ledState;
-      digitalWrite(led, ledState);
-      notifyClientstest();
-    }
-    if (strcmp((char*)data, "toggleDisplay") == 0) { //If message = toggleDisplay
-      displayState = !displayState;
-      Heltec.display->clear();
-      if (displayState == LOW){
-        printIP();
-      }
-      if (displayState == HIGH){
-        Heltec.display->drawXbm(34, 14, bird_width, bird_height, bird_bits);
-      }
-      Heltec.display->display();
-      notifyClientstest();
-    }
-    if (strcmp((char*)data, "getMessage") == 0) { //If message = getMessage
-      notifyClientstest();
+    //Test for messages from users webpage
+    if (strstr((char*)data, "populateUsers") != NULL) { //If message contains populateUsers
+      String message = (char*)data;
+      Serial.println("Got the following message data: " + message);
+      String response = getData();
+      notifyUserData(response);
     }
 
-    //Test for messages from users webpage
     if (strstr((char*)data, "removeUser") != NULL) { //If message contains removeUser
       String message = (char*)data;
       Serial.println("Got the following message data: " + message);
-      int response = removeUser(message.substring(11).toInt());
-      notifyRemoveTable(response);
+      removeUser(message.substring(11).toInt());
+      String response = getData();
+      notifyUserData(response);
     }
 
     //Test for messages from add new users webpage
@@ -230,8 +204,10 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         notifyError();
       }
       else{
-        addUser(newUser, newID);
-        notifyUsersTable();
+        addUser(newUser, newID); // TODO: define it for db implementation
+        String response = getData();
+        notifyUserData(response);
+        notifyNewUser();
       }
     }
     if (strcmp((char*)data, "readRFID") == 0) { //If message = readRFID  

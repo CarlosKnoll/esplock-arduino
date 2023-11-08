@@ -34,34 +34,33 @@
 #include <Arduino.h>
 #include <heltec.h>
 #include <WiFi.h>
-#include <ESPmDNS.h>
 #include <Update.h>
 #include <SPIFFS.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncElegantOTA.h>
 #include <SPI.h>
 #include <MFRC522.h>
-#include <ArduinoJson.h>
-#include <cstring>
+#include <sqlite3.h>
 
 // -----------------------------------------------
 // Function prototypes
 
 void printMessage( String string2print );
-void jsonHandler( String idTag );
+void dbCheck( String id );
 void printIP();
-int removeUser( int idDelete );
+void removeUser( int idDelete );
 void addUser(String usuario, String id);
 String newCard();
 void updateStatus();
 int checkTag(String newTag);
+String getData();
 
 // -----------------------------------------------
 
 #include "webServerSetup.cpp"
 #include "heltecDisplay.cpp"
 #include "rfidSetup.cpp"
-#include "jsonHandler.cpp"
+#include "sqliteHandler.cpp"
 
 // -----------------------------------------------
 
@@ -96,6 +95,7 @@ void setup(void)
     setupWebPages();
     initWebSocket();
     beginServer();
+    beginDB();
 
     Serial.println("HTTP server started");
     ipString = "Success! " + ipMsg;
@@ -103,7 +103,6 @@ void setup(void)
 
 // -----------------------------------------------
 void loop(void){
-    //server.handleClient();
     if (newUserTag == 1){
         newUser = newCard();
     }

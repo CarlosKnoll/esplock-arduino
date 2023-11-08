@@ -37,7 +37,7 @@ function onMessage(event) {
         }
         rfidStatus = false
         document.getElementById('RFID').innerHTML = 'Ler TAG RFID'
-        if (event.data == 'redoTable'){
+        if (event.data == 'clearFields'){
             document.getElementById('user').value = ""
             document.getElementById('tag').value = ""
             alert('Usuario adicionado')

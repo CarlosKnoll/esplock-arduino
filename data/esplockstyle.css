@@ -43,8 +43,8 @@ input[type=text] {
     text-align: center;
     justify-content: center;
     display: table-cell;
-    width: 30vw;
-    font-size: 4vw;
+    width: 20vw;
+    font-size: 2vw;
     border: solid #727272;
     margin: 8px 0;
     box-sizing: border-box;
@@ -63,7 +63,7 @@ form>p {
 
 label{
     width: 20vw;
-    font-size: 4vw;
+    font-size: 2vw;
     display: table-cell;
     text-align: center;
     justify-content: center;
@@ -83,7 +83,7 @@ label{
     color: white;
     padding: 16px 10px;
     text-decoration: none;
-    font-size: 4vw;
+    font-size: 2vw;
     margin: 8px;
     outline: none;
     cursor: pointer; 
