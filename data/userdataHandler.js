@@ -25,10 +25,16 @@ function onClose(event) {
 }
 
 function onMessage(event) {
+    console.log(event.data)
     let data = event.data;
-    usersArray = data.split(";");
-    populateUsers();
-    append_addUser();
+    checkData = data.split("=")
+    console.log(checkData)
+    if (checkData[0] == 'users'){
+        usersArray = checkData[1].split(";");
+        populateUsers();
+        append_addUser();
+        append_return();
+    }
 }
 
 function removeUser(event){
@@ -37,7 +43,7 @@ function removeUser(event){
 }
 
 function populateUsers(){
-    var table = document.getElementById('usersTable');
+    var table = document.getElementById('usersTable').tBodies[0];
     table.innerHTML = "";
     usersArray.forEach(element => {
         const currentUser = element.split(",");
@@ -52,7 +58,7 @@ function populateUsers(){
 }
 
 function append_addUser(){
-    var table = document.getElementById('usersTable');
+    var table = document.getElementById('usersTable').tBodies[0];
 
     var blank = document.createElement('tr');
     blank.classList.add('spacer');

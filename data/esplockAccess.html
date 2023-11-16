@@ -1,19 +1,20 @@
 <html>
     <head>
         <link rel="stylesheet" href="esplockstyle.css">
-        <script src='/userdataHandler.js'></script>
+        <script src='/userAccess.js'></script>
         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
         <meta charset="UTF-8">
     </head>
     <body>
         <h1>ESPLOCK</h1>
-        <h2>Lista de Usuários</h2>
-        <div class="table-container">
-            <table class = "table" id="usersTable">
+        <h2>Histórico de accessos</h2>
+        <div class = "table-container">
+            <table class="table table2" id="accessTable">
               <thead>
                 <tr>
                   <th>Usuário</th>
                   <th>TAG</th>
+                  <th>Data</th>
                 </tr>
               </thead>
               <tbody>
@@ -23,6 +24,6 @@
         <br>
         <div class="button-container">
           <button onclick="history.back()" class="button button3">Retornar</button></a>
-        </div>
+        </div
     </body>
 </html>

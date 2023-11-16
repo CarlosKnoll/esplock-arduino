@@ -2,38 +2,48 @@ html {
     font-family: Helvetica;
     display: inline-block;
     margin: 0px auto;
+    text-align: center;
+    color: black;
 }
 
-html, th, td{
+th{
     text-align: center;
     font-size:2vw;
+    height: 2em;
     color: black;
 }
 
 td{
+    text-align: center;
+    width: 20vw;
+    height: 2em;
+    color: black;
     vertical-align: center;
     padding: 10px;
     border: 1px solid black;
 }
 
-table{
+.table{
     border-collapse: collapse;
-    width: 20vw;
 }
 
-td:last-child {
+.table td:last-child {
     border :none;
+    width: 1.5em;
 }
 
 .table tr.spacer > td {
     border: none;
     padding: 0
-  }
+}
 
-tr.lastRow>td {
+.table tr.lastRow > td {
     color: #cecece;
-    font-size: 2vw;
-  }
+}
+
+.table2 td:last-child {
+    border :1px solid black;
+}
 
 .table-container{
     display: inline-block;
@@ -43,96 +53,191 @@ input[type=text] {
     text-align: center;
     justify-content: center;
     display: table-cell;
-    width: 20vw;
-    font-size: 2vw;
     border: solid #727272;
     margin: 8px 0;
     box-sizing: border-box;
-}
+}   
 
 input[type=text]:focus {
     border: solid #000000;
-}
+}  
 
 form>p {
     display: inline;
     text-align: center;
     justify-content: center;
-}
-
+} 
 
 label{
-    width: 20vw;
-    font-size: 2vw;
     display: table-cell;
     text-align: center;
     justify-content: center;
 }
 
-.button-container{
-    display: inline-block;
-}
-
 .button {
+    line-height: 0;
     text-align: center;
     background-color: #4CAF50;
-    width: 20vw;
     top: 120px;
     border: none; 
     border-radius: 50px;
     color: white;
     padding: 16px 10px;
     text-decoration: none;
-    font-size: 2vw;
     margin: 8px;
     outline: none;
     cursor: pointer; 
-}
-
+}   
 .button:hover { background-color: #7cdf80;  }
 .button:active {
     background-color: #7cdf80;
-    transform: translateY(2px); }
+    transform: translateY(2px); 
+}    
 
 .button2 {background-color: #555555;}
-.button2:hover { background-color: #888888; }
+.button2:hover { background-color: #888888; }  
 
 .button3 {background-color: #eb4034;}
-.button3:hover { background-color: #f7a099; }
+.button3:hover { background-color: #f7a099; }  
 
 .button4 { 
-    width: 6vw;
     top: 20px;
     border-radius: 0px;
-    color: white;
     padding: 3px;
-    font-size: 2vw;
     margin: 0px;
-    outline: none;
-    cursor: pointer;
     background-color: #eb4034;
 }
-.button4:hover { background-color: #f7a099; }
+.button4:hover { background-color: #f7a099; }  
 
 .button5 {
-    width: 6vw;
     top: 20px;
     border-radius: 0px;
-    color: white;
     padding: 3px;
-    font-size: 2vw;
     margin: 0px;
-    outline: none;
-    cursor: pointer;
     background-color: #4CAF50;
-}
-
-.button5:hover { background-color: #7cdf80; }
+}    
+.button5:hover { background-color: #7cdf80; }    
 
 .buttonRfid {
     background-color: #32beff;
-    width: 40vw;
-    cursor: pointer; 
+}
+    
+.buttonRfid:hover { background-color: #73cbf3; }
+
+@media screen and (orientation:portrait) {
+    h1{
+        font-size: 4vw;
+    }
+
+    h2{
+        font-size: 3vw;
+    }
+
+    .table{
+        width: 50vw;
+        height: 1.5em;
+    }
+
+    .table>tbody{
+        font-size:2vw;
+    }
+
+    .table2 td:last-child {
+        font-size: 1.5vw;
+    }
+
+    input[type=text] {
+        font-size: 2vw;
+        width: 15vw;
+        height: 1.5em;
+    }
+
+    label{
+        font-size: 2vw;
+        width: 10vw;
+        height: 1.5em;
+    } 
+
+    .button-container{
+        display: block;
+    }  
+
+    .button {
+        font-size: 2vw;
+        width: 20vw;
+        height: 2em;
+    }  
+
+    .button4 { 
+        font-size: 2vw;
+        width: 1.5em;
+        height: 1.5em;
+    }
+
+    .button5 {
+        font-size: 2vw;
+        width: 1.5em;
+        height: 1.5em;
+    }  
+
+    .buttonRFID{ width: 20vw; }
 }
 
-.buttonRfid:hover { background-color: #73cbf3; }
+@media screen and (orientation:landscape) { 
+    h1{
+        font-size: 3vw;
+    }
+
+    h2{
+        font-size: 2vw;
+    }
+
+    .table{
+        width: 35vw;
+        height: 1.5em;
+    }
+
+    .table>tbody{
+        font-size: 1.8vw;
+    }
+
+    .table2 td:last-child {
+        font-size: 1.5vw;
+    }
+
+    input[type=text] {
+        font-size: 2vw;
+        width: 12vw;
+        height: 1.2em;
+    }
+
+    label{
+        font-size: 2vw;
+        width: 8vw;
+        height: 1.2em;
+    } 
+
+    .button-container{
+        display: inline-block;
+    }  
+
+    .button {
+        font-size: 2vw;
+        width: 15vw;
+        height: 1.5em;
+    }  
+
+    .button4 { 
+        font-size: 2vw;
+        width: 1.5em;
+        height: 1.5em;
+    }
+
+    .button5 {
+        font-size: 2vw;
+        width: 1.5em;
+        height: 1.5em;
+    }  
+
+    .buttonRFID{ width: 20vw; }
+}

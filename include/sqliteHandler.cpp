@@ -59,6 +59,21 @@ String getData(){
     return message;
 }
 
+String getAccess(){
+    message = "";
+    db_open("/spiffs/users.db", &db1);
+    rc = db_exec(db1, "SELECT * FROM access;");
+    // error handler
+    // if (rc != SQLITE_OK) {
+    //     sqlite3_close(db1);
+    //     return;
+    // }
+    sqlite3_close(db1);
+    removeLastChar();
+    Serial.println("Message sending: " + message);
+    return message;
+}
+
 void removeUser(int idDelete){
     db_open("/spiffs/users.db", &db1);
     String sql = "DELETE FROM users WHERE id = " + String(idDelete) + ";";
@@ -71,7 +86,6 @@ void dbCheck(String id){
     message = "";
     db_open("/spiffs/users.db", &db1);
     String sql = "SELECT IFNULL((SELECT name FROM users WHERE tag == '" + String(id) + "'),'FALSE');";
-    Serial.println("SQL command: " + sql);
     rc = db_exec(db1, sql.c_str());
     removeLastChar();
 
@@ -86,11 +100,50 @@ void dbCheck(String id){
     sqlite3_close(db1);
 }
 
+String dbAccessCheck(String tag){
+    Serial.println("Getting check from access functions");
+    dbCheck(tag);
+    String user = message;
+    if (message.equals("FALSE")){
+        sqlite3_close(db1);
+        return message;
+    }
+    else{
+        db_open("/spiffs/users.db", &db1);
+
+        message = "";
+        String sql = "SELECT name FROM users WHERE name == '" + user + "';";
+        rc = db_exec(db1, sql.c_str());
+        removeLastChar();
+        String usuario = message;
+
+        message = "";
+        sql = "SELECT tag FROM users WHERE name == '" + user + "';";
+        rc = db_exec(db1, sql.c_str());
+        removeLastChar();
+        String tag = message;
+
+        message = "";
+        rc = db_exec(db1, "SELECT MAX(id) FROM access;");
+        removeLastChar();
+        int id = message.toInt() + 1;
+
+        String date = returnTime();
+        String returnMessage = usuario + ";" + tag;
+
+        sql = "INSERT INTO access VALUES(" + String(id) + ", '" + String(usuario) + "', '" + String(tag) + "', '" + String(date) + "');";
+        rc = db_exec(db1, sql.c_str());
+        removeLastChar();
+
+        sqlite3_close(db1);
+        return returnMessage;
+    }
+}
+
 int checkTag(String id){
     message = "";
     db_open("/spiffs/users.db", &db1);
     String sql = "SELECT IFNULL((SELECT tag FROM users WHERE tag == '" + id + "'),'FALSE');";
-    Serial.println("SQL command: " + sql);
     rc = db_exec(db1, sql.c_str());
     removeLastChar();
     sqlite3_close(db1);
@@ -110,7 +163,6 @@ void addUser(String usuario, String tag){
     id = message.toInt() + 1;
     Serial.println("ID: " + id);
     String sql = "INSERT INTO users VALUES(" + String(id) + ", '" + String(usuario) + "', '" + String(tag) + "');";
-    Serial.println("SQL command: " + sql);
     rc = db_exec(db1, sql.c_str());
     sqlite3_close(db1);
 }

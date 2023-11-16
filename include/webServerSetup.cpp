@@ -24,32 +24,8 @@ AsyncWebSocket ws("/ws");
 // ------------------------------------------------------------------
 // Test page
 int ledState = LOW;
-int displayState = LOW;
 #define led     25
 String msg="";
-
-// ------------------------------------------------------------------
-
-String processor(const String& var){
-  Serial.println(var);
-  if(var == "STATELED"){
-    if (ledState){
-      return "ON";
-    }
-    else{
-      return "OFF";
-    }
-  }
-  if(var == "STATEDISPLAY"){
-    if (displayState){
-      return "ON";
-    }
-    else{
-      return "OFF";
-    }
-  }
-  return String();
-}
 
 // ------------------------------------------------------------------
 
@@ -93,19 +69,26 @@ void setupWebPages(){
     request->send(SPIFFS, "/addUser.js", "text/javascript"); //webpage javascript
   });
 
-  // Placeholder for future webpages/functionalities
+  // Access history webpage
   server.on("/acessos", HTTP_GET, [](AsyncWebServerRequest *request){
-      request->send(200, "text/plain", "acessos");
+      request->send(SPIFFS, "/esplockAccess.html", "text/html");
   }); 
+  server.on("/userAccess.js", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send(SPIFFS, "/userAccess.js", "text/javascript");
+  }); 
+
+  // Access webpage
   server.on("/entrada", HTTP_GET, [](AsyncWebServerRequest *request){
-      request->send(200, "text/plain", "entrada");
+      request->send(SPIFFS, "/esplockNewAccess.html", "text/html");
   }); 
+  server.on("/userNewAccess.js", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(SPIFFS, "/userNewAccess.js", "text/javascript");
+  }); 
+
+  // Placeholder for future webpages/functionalities
   server.on("/saida", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", "saida");
-  }); 
-  server.on("/remove", HTTP_GET, [](AsyncWebServerRequest *request){
-      request->send(200, "text/plain", "remover usuario");
-  }); 
+  });
 }
 
 
@@ -152,15 +135,14 @@ void beginServer(){
 // Send responses to client-side javascript
 
 // Users webpage
-void notifyUserData (String response){ //Sends back raw db data
+void notifyUserData (String info, String response){ //Sends back raw db data
   Serial.println("data: " + response);
-  ws.textAll(String (response));
+  ws.textAll(String (info) + "=" + String (response));
 }
 
 // New user webpage
-void notifyRFID(String uid){
-  Serial.println("Notifying rfid: " + uid);
-  ws.textAll(uid);
+void notifyRFID(String info, String uid){
+  ws.textAll(String (info) + "=" + String (uid));
 }
 
 void notifyError(){
@@ -182,7 +164,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
       String message = (char*)data;
       Serial.println("Got the following message data: " + message);
       String response = getData();
-      notifyUserData(response);
+      notifyUserData("users", response);
     }
 
     if (strstr((char*)data, "removeUser") != NULL) { //If message contains removeUser
@@ -190,7 +172,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
       Serial.println("Got the following message data: " + message);
       removeUser(message.substring(11).toInt());
       String response = getData();
-      notifyUserData(response);
+      notifyUserData("users", response);
     }
 
     //Test for messages from add new users webpage
@@ -206,18 +188,31 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
       else{
         addUser(newUser, newID); // TODO: define it for db implementation
         String response = getData();
-        notifyUserData(response);
+        notifyUserData("users", response);
         notifyNewUser();
       }
     }
-    if (strcmp((char*)data, "readRFID") == 0) { //If message = readRFID  
-      updateStatus();
+
+    //Test for messages from access webpage
+    if (strstr((char*)data, "populateAccess") != NULL) { //If message contains populateUsers
+      String message = (char*)data;
+      Serial.println("Got the following message data: " + message);
+      String response = getAccess();
+      notifyUserData("access", response);
     }
-    
+
+    //Test for messages regarding RFID readings
+    if (strcmp((char*)data, "readRFID") == 0) { //If message = readRFID  
+      updateStatus("");
+    }
     if (strcmp((char*)data, "cancelRFID") == 0) { //If message = cancelRFID
-      updateStatus();
-      String uid = "cancel";
-      notifyRFID(uid);
+      String uid = "";
+      updateStatus(uid);
+      updateMode(uid);
+      notifyRFID("cancel", uid);
+    }
+    if (strcmp((char*)data, "accessRFID") == 0) { //If message = cancelRFID
+      updateMode("");
     }
   }
 }

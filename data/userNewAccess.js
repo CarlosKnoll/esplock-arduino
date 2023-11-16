@@ -30,24 +30,21 @@ function onClose(event) {
     setTimeout(initWebSocket, 2000);
 }
 function onMessage(event) {
+    var client = ''
     console.log(event.data)
-    if (event.data == 'unavailable'){
-        document.getElementById('tag').value = ""
-        alert('TAG já cadastrada')
-    }
-    else if (event.data == 'cancel'){
-        document.getElementById('tag').value = ""
-    }
-    else if (event.data == 'clearFields'){
-        document.getElementById('user').value = ""
-        document.getElementById('tag').value = ""
-        alert('Usuario adicionado')
-    }
     checkData = event.data.split("=")
-    if (checkData[0] == 'newUserId'){
+    if (checkData[0] == 'NewAccess'){
+        if(checkData[1] == 'FALSE'){
+            client = 'Usuário não cadastrado'
+        }
+        else{
+            const user = checkData[1].split(";");
+            client = 'Bem vindo ' + user[0] + '! <br> (TAG: ' + user[1] + ')'
+            websocket.send('populateAccess');
+        }  
+        document.getElementById('feedback').innerHTML = 'Tentativa de acesso detectada. <br>' + client 
         rfidStatus = false
-        document.getElementById('RFID').innerHTML = 'Ler TAG RFID'
-        document.getElementById('tag').value = checkData[1]
+        document.getElementById('RFID').innerHTML = 'Ler TAG RFID'      
     }
     else if(checkData[0] == 'cancel'){
         rfidStatus = false
@@ -59,16 +56,9 @@ function getRFID(){
     rfidStatus = !rfidStatus    
     if(rfidStatus == true){
         document.getElementById('RFID').innerHTML = 'Aguardando TAG...'
-        websocket.send('readRFID')
+        websocket.send('accessRFID')
     }
     if(rfidStatus == false){
         websocket.send('cancelRFID')
     }
-}
-
-function sendInfo(event){
-    console.log(event)
-    var message = "addUser:User=" + event.srcElement[0].value + ";ID=" + event.srcElement[1].value
-    console.log("Form submitted: User:" + event.srcElement[0].value + "; ID:" + event.srcElement[1].value)
-    websocket.send(message)
 }

@@ -42,8 +42,9 @@ void checkCard(){
     }
     printHex(mfrc522.uid.uidByte, mfrc522.uid.size);
 
-    Serial.println("TAG lida:" + id);
+    Serial.println("CheckCard TAG lida:" + id);
     digitalWrite(led, HIGH);
+
     dbCheck(id);
 
     mfrc522.PICC_HaltA();
@@ -68,11 +69,21 @@ String newCard(){
     }
     printHex(mfrc522.uid.uidByte, mfrc522.uid.size);
 
-    Serial.println("TAG lida:" + id);
+    Serial.println("newCard TAG lida:" + id);
     digitalWrite(led, HIGH);
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
 
     return id;
+    }
+}
+
+String access(){
+    String tag = newCard();
+    if (tag != ""){
+        return dbAccessCheck(tag);
+    }
+    else {
+        return "";
     }
 }

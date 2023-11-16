@@ -2,27 +2,20 @@
     <head>
         <link rel="stylesheet" href="esplockstyle.css">
         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-        <script src='/addUser.js'></script>
+        <script src='/userNewAccess.js'></script>
         <meta charset="UTF-8">
     </head>
     <body>
         <h1>ESPLOCK</h1>
-        <h2>Adicionar novo usuário</h2>
-            <form id="newData" onsubmit="sendInfo(event); return false">
-                <p>
-                <label for="user">Usuário: </label>
-                <input type="text" id="user" name="fname"><br><br>
-                </p>
-                <p>
-                <label for="tag">ID: </label>
-                <input type="text" id="tag" name="lname"><br><br>
-                </p>
-            </form>
+        <h2>Página de acesso</h2>
             <p>
                 <button id="RFID" class="button buttonRfid">Ler TAG RFID</button>
             </p>
+            <div class ="readFeedback"> 
+                <h3 id="feedback"></span>
+            </div>
             <div class="button-container">
-                <button type="submit" form="newData" class="button">Adicionar</button></a>
+                <a href="/novouser"><button class="button">Adicionar</button></a>
             </div>
             <div class="button-container">
                 <button onclick="history.back()" class="button button3">Retornar</button></a>         

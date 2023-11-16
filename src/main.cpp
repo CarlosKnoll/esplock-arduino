@@ -31,6 +31,8 @@
    Kit Mauricio TTGO MAC 24-6F-28-25-50-F8
 */
 
+// STRUCT MATRIZ ESTÁTICA? 
+
 #include <Arduino.h>
 #include <heltec.h>
 #include <WiFi.h>
@@ -41,6 +43,9 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #include <sqlite3.h>
+#include <ESP32Time.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
 
 // -----------------------------------------------
 // Function prototypes
@@ -51,14 +56,19 @@ void printIP();
 void removeUser( int idDelete );
 void addUser(String usuario, String id);
 String newCard();
-void updateStatus();
+void updateStatus(String message);
+void updateMode(String message);
 int checkTag(String newTag);
 String getData();
+String getAccess();
+String access();
+String dbAccessCheck(String tag);
+String returnTime();
 
 // -----------------------------------------------
 
 #include "webServerSetup.cpp"
-#include "heltecDisplay.cpp"
+#include "heltecSetup.cpp"
 #include "rfidSetup.cpp"
 #include "sqliteHandler.cpp"
 
@@ -66,7 +76,9 @@ String getData();
 
 String ipString;
 int newUserTag = LOW;
+int readUser = LOW;
 String newUser = "";
+String user = "";
 
 // -----------------------------------------------
 void msgEspLock1() {
@@ -74,16 +86,29 @@ void msgEspLock1() {
     printMessage(string2print);
 }
 
-void updateStatus(){
-    newUserTag = !newUserTag;
+void updateStatus( String message ){
+    if (message == "cancel"){
+        readUser = LOW;
+    }
+    else{
+        newUserTag = !newUserTag;
+    }
+}
+
+void updateMode( String message ){
+    if (message == "cancel"){
+        readUser = LOW;
+    }
+    else{
+        readUser = !readUser;
+    }
 }
 
 // -----------------------------------------------
 void setup(void)
 {
     Serial.begin(115200);
-    SPIFFS.begin(true);
-    Heltec.begin(true /*DisplayEnable Enable*/, false /*LoRa Disable*/, true /*Serial Enable*/);
+    setupHeltec();
     setupRFID();
 
     pinMode(led, OUTPUT);
@@ -99,19 +124,32 @@ void setup(void)
 
     Serial.println("HTTP server started");
     ipString = "Success! " + ipMsg;
+    
 }
 
 // -----------------------------------------------
 void loop(void){
+    if (newUserTag == 0 && readUser == 0){
+        checkCard();
+    }
+
+    // If set to add new user
     if (newUserTag == 1){
         newUser = newCard();
     }
-    if (newUserTag == 0){
-        checkCard();
-    }
     if (newUser != ""){
-        notifyRFID(newUser);
+        notifyRFID("newUserId",newUser);
         newUser = "";
-        updateStatus();
+        updateStatus("");
+    }
+
+    // If set to read user for access
+    if (readUser == 1){
+        user = access();
+    }
+    if (user != ""){
+        notifyRFID("NewAccess",user);
+        user = "";
+        updateMode("");
     }
 }
