@@ -111,6 +111,8 @@ void setupAP(){
   Serial.print("AP IP address: ");
   Serial.println(IP);
 
+  
+
   String ip = IP.toString();
   ipMsg = "Success! " + ip;
   printIP();

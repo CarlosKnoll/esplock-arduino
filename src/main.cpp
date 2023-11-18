@@ -108,8 +108,8 @@ void updateMode( String message ){
 void setup(void)
 {
     Serial.begin(115200);
-    setupHeltec();
     setupRFID();
+    setupHeltec();
 
     pinMode(led, OUTPUT);
 

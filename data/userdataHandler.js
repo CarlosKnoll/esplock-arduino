@@ -32,8 +32,7 @@ function onMessage(event) {
     if (checkData[0] == 'users'){
         usersArray = checkData[1].split(";");
         populateUsers();
-        append_addUser();
-        append_return();
+        append_extra();
     }
 }
 
@@ -57,7 +56,7 @@ function populateUsers(){
     });
 }
 
-function append_addUser(){
+function append_extra(){
     var table = document.getElementById('usersTable').tBodies[0];
 
     var blank = document.createElement('tr');
@@ -65,9 +64,13 @@ function append_addUser(){
     blank.innerHTML = '<td colspan="3"><br/> </td>'
     table.appendChild(blank);
     
-    var tr = document.createElement('tr');
-    tr.classList.add('lastRow');
-    tr.innerHTML = '<td colspan="2">(Adicionar usuário)</td>' + 
+    var add = document.createElement('tr');
+    add.classList.add('lastRow');
+    add.innerHTML = '<td colspan="2">(Adicionar usuário)</td>' + 
     '<td><a href="/novouser"><button class="button button5">+</button></td>'
-    table.appendChild(tr);
+    table.appendChild(add);
+
+    var goBack = document.createElement('tr');
+    goBack.innerHTML = '<td colspan="2"><button onclick="history.back()" class="button button3">Retornar</button></td>'
+    table.appendChild(goBack);
 }

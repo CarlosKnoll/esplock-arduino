@@ -32,6 +32,7 @@ function onMessage(event) {
     if (checkData[0] == 'access'){
         accessArray = data.split(";");
         populateTable();
+        addButton();
     }
 }
 
@@ -47,4 +48,11 @@ function populateTable(){
         '<td>' + currentUser[3] + '</td>'
         table.appendChild(tr);
     });
+}
+
+function addButton(){
+    var table = document.getElementById('accessTable').tBodies[0];
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td colspan="3"><button onclick="history.back()" class="button button3">Retornar</button></td>'
+    table.appendChild(tr);
 }
