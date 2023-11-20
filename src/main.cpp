@@ -31,8 +31,6 @@
    Kit Mauricio TTGO MAC 24-6F-28-25-50-F8
 */
 
-// STRUCT MATRIZ ESTÁTICA? 
-
 #include <Arduino.h>
 #include <heltec.h>
 #include <WiFi.h>
@@ -59,8 +57,7 @@ String newCard();
 void updateStatus(String message);
 void updateMode(String message);
 int checkTag(String newTag);
-String getData();
-String getAccess();
+String getData(String numPage, String type);
 String access();
 String dbAccessCheck(String tag);
 String returnTime();

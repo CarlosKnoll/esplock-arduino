@@ -57,32 +57,32 @@ void setupWebPages(){
   server.on("/usuarios", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(SPIFFS, "/esplockUsers.html" ,"text/html"); //webpage HTML
   }); 
-  server.on("/userdataHandler.js", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/userdataHandler.js", "text/javascript"); //webpage javascript
+  server.on("/esplockUsers.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(SPIFFS, "/esplockUsers.js", "text/javascript"); //webpage javascript
   });
 
   // Add new users webpage
   server.on("/novouser", HTTP_GET, [](AsyncWebServerRequest *request){
-      request->send(SPIFFS, "/esplockNewUser.html", "text/html"); //webpage HTML
+      request->send(SPIFFS, "/esplockAddUser.html", "text/html"); //webpage HTML
   }); 
-  server.on("/addUser.js", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(SPIFFS, "/addUser.js", "text/javascript"); //webpage javascript
+  server.on("/esplockAddUser.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(SPIFFS, "/esplockAddUser.js", "text/javascript"); //webpage javascript
   });
 
   // Access history webpage
   server.on("/acessos", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(SPIFFS, "/esplockAccess.html", "text/html");
   }); 
-  server.on("/userAccess.js", HTTP_GET, [](AsyncWebServerRequest *request){
-      request->send(SPIFFS, "/userAccess.js", "text/javascript");
+  server.on("/esplockAccess.js", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send(SPIFFS, "/esplockAccess.js", "text/javascript");
   }); 
 
   // Access webpage
   server.on("/entrada", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(SPIFFS, "/esplockNewAccess.html", "text/html");
   }); 
-  server.on("/userNewAccess.js", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(SPIFFS, "/userNewAccess.js", "text/javascript");
+  server.on("/esplockNewAccess.js", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(SPIFFS, "/esplockNewAccess.js", "text/javascript");
   }); 
 
   // Placeholder for future webpages/functionalities
@@ -139,7 +139,7 @@ void beginServer(){
 // Users webpage
 void notifyUserData (String info, String response){ //Sends back raw db data
   Serial.println("data: " + response);
-  ws.textAll(String (info) + "=" + String (response));
+  ws.textAll(String (info) + "#" + String (response));
 }
 
 // New user webpage
@@ -151,10 +151,6 @@ void notifyError(){
   ws.textAll("unavailable");
 }
 
-void notifyNewUser(){
-  ws.textAll("clearFields");
-}
-
 // Websocket Handler
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
@@ -164,23 +160,23 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
     //Test for messages from users webpage
     if (strstr((char*)data, "populateUsers") != NULL) { //If message contains populateUsers
       String message = (char*)data;
-      Serial.println("Got the following message data: " + message);
-      String response = getData();
+      String numPage = message.substring(message.indexOf(";numPage=") + 9);
+      String response = getData(numPage, "users");
       notifyUserData("users", response);
     }
 
     if (strstr((char*)data, "removeUser") != NULL) { //If message contains removeUser
       String message = (char*)data;
-      Serial.println("Got the following message data: " + message);
-      removeUser(message.substring(11).toInt());
-      String response = getData();
+      int removalId = message.substring(11, message.indexOf(";numPage=")).toInt();
+      removeUser(removalId);
+      String numPage = message.substring(message.indexOf(";numPage=") + 9);
+      String response = getData(numPage, "users");
       notifyUserData("users", response);
     }
 
     //Test for messages from add new users webpage
     if (strstr((char*)data, "addUser") != NULL) { //If message contains addUser
       String message = (char*)data;
-      Serial.println("Got the following message data: " + message);
       String newUser = message.substring(message.indexOf("User=") + 5, message.indexOf("ID=") - 1);
       String newID = message.substring(message.indexOf("ID=") + 3);
       int availableTag = checkTag(newID);
@@ -188,10 +184,8 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         notifyError();
       }
       else{
-        addUser(newUser, newID); // TODO: define it for db implementation
-        String response = getData();
-        notifyUserData("users", response);
-        notifyNewUser();
+        addUser(newUser, newID);
+        notifyUserData("update", "add");
       }
     }
 
@@ -199,21 +193,28 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
     if (strstr((char*)data, "populateAccess") != NULL) { //If message contains populateUsers
       String message = (char*)data;
       Serial.println("Got the following message data: " + message);
-      String response = getAccess();
+      String numPage = message.substring(message.indexOf(";numPage=") + 9);
+      String response = getData(numPage, "access");
       notifyUserData("access", response);
     }
 
     //Test for messages regarding RFID readings
     if (strcmp((char*)data, "readRFID") == 0) { //If message = readRFID  
+      String message = (char*)data;
+      Serial.println("Got the following message data: " + message);
       updateStatus("");
     }
     if (strcmp((char*)data, "cancelRFID") == 0) { //If message = cancelRFID
+      String message = (char*)data;
+      Serial.println("Got the following message data: " + message);
       String uid = "";
       updateStatus(uid);
       updateMode(uid);
       notifyRFID("cancel", uid);
     }
-    if (strcmp((char*)data, "accessRFID") == 0) { //If message = cancelRFID
+    if (strcmp((char*)data, "accessRFID") == 0) { //If message = acessRFID
+      String message = (char*)data;
+      Serial.println("Got the following message data: " + message);
       updateMode("");
     }
   }

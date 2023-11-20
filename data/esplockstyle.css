@@ -3,20 +3,17 @@
 }
 
 html {
-    text-align: center;
     font-family: Helvetica;
+    text-align: center;
     display: block;
     color: black;
 }
 
 td{
     text-align: center;
-    width: 20vw;
-    height: 2em;
-    color: black;
     vertical-align: center;
-    padding: 0.75em;
     border: 1px solid black;
+    color: black;
 }
 
 .table-container{
@@ -28,26 +25,73 @@ td{
     margin: 0 auto;
 }
 
-.table td:last-child {
-    border :none;
-}
-
 .table tr.spacer > td {
     border: none;
     padding: 0;
 }
 
-.table tr.lastRow > td {
+.users-table td:last-child {
+    border:none;
+}
+
+.users-table tfoot tr.addUser td {
     color: #cecece;
 }
 
-.table tr:last-child > td {
-    border: none;
+.border{
+    border: 1px solid black;
+}
+.no-border{
+    border :none;
 }
 
-.table2 td:last-child {
-    border :1px solid black;
+.button-container{
+    display: block;
+    margin: 0 auto;
+}  
+
+.button {
+    line-height: 0;
+    text-align: center;
+    border: none; 
+    border-radius: 50px;
+    color: white;
+    cursor: pointer; 
 }
+.button:active { transform: translateY(2px); }    
+
+.green-button { background-color: #4CAF50; }
+.green-button:hover { background-color: #7cdf80; }
+
+.red-button {background-color: #eb4034;}
+.red-button:hover { background-color: #f7a099; }  
+
+.x-button { 
+    border-radius: 0px;
+    background-color: #eb4034;
+}
+.x-button:hover { background-color: #f7a099; }  
+
+.plus-button {
+    border-radius: 0px;
+    background-color: #4CAF50;
+}    
+.plus-button:hover { background-color: #7cdf80; }    
+
+.data-button {
+    border-radius: 0px;
+    background-color: #32beff;
+}    
+.data-button:hover { background-color: #73cbf3; }      
+
+.data-button-deactivate {
+    cursor: not-allowed;
+    border-radius: 0px;
+    background-color: #727272;;
+} 
+
+.RFID-button { background-color: #32beff; }
+.RFID-button:hover { background-color: #73cbf3; }
 
 label{
     display: table-cell;
@@ -68,155 +112,128 @@ form>p {
     justify-content: center;
 } 
 
-.button {
-    line-height: 0;
-    text-align: center;
-    border: none; 
-    border-radius: 50px;
-    color: white;
-    background-color: #4CAF50;
-    cursor: pointer; 
-}   
-.button:hover { background-color: #7cdf80;  }
-.button:active { transform: translateY(2px); }    
-
-.button2 {background-color: #555555;}
-.button2:hover { background-color: #888888; }  
-
-.button3 {background-color: #eb4034;}
-.button3:hover { background-color: #f7a099; }  
-
-.button4 { 
-    border-radius: 0px;
-    background-color: #eb4034;
-}
-.button4:hover { background-color: #f7a099; }  
-
-.button5 {
-    border-radius: 0px;
-    background-color: #4CAF50;
-}    
-.button5:hover { background-color: #7cdf80; }    
-
-.buttonRfid { background-color: #32beff; }
-.buttonRfid:hover { background-color: #73cbf3; }
-
-@media only screen and (max-width: 768px){
-     /* For mobile: */
+@media only screen and (hover: none) and (pointer: coarse){
+    /* For mobile: */
     h1{ font-size: 7.5vw; }
-    h2{ font-size: 6.5vw; }
-    h3{ font-size: 5.5vw; }
-
-    td{ font-size: 3vw; }
+    h2{ font-size: 6vw; }
+    h3{ font-size: 5vw; }
+    
+    td{ 
+        font-size: 3vw; 
+        height: 1.75em;
+    }
     th{
         font-size:3vw;
         height: 2em;
     }
 
     .table{ width: 70vw; }
-    .table td:last-child { max-width: 1em; }   
-    .table2 td:last-child { min-width: 28vw; }
 
+    .button-container{ width: 100%; }  
+    
+    .button {
+        font-size: 4vw;
+        width: 70vw;
+        height: 2em;
+    }
+    
+    .min-square-button{
+        font-size: 2vw;
+        width: 1.5em;
+        height: 1.5em;
+        padding: 3px;
+    }
+
+    .data-button {
+        font-size: 3vw;
+        width: 1.5em;
+        height: 1.5em;
+        padding: 3px;
+    } 
+
+    .data-button-deactivate {
+        font-size: 3vw;
+        width: 1.5em;
+        height: 1.5em;
+        padding: 3px;
+    } 
+    .data-button-deactivate:active { transform: none; }    
+
+    .RFID-button{ width: 70vw; }
+    
     input[type=text] {
         font-size: 4.5vw;
         width: 30vw;
         height: 1.5em;
     }
-
+    
     label{
         font-size: 4.5vw;
         width: 30vw;
         height: 1.5em;
     } 
-
-    .button-container{
-        display: block;
-        width: 100%;
-        margin: 0 auto;
-    }  
-
-    .button {
-        font-size: 4.5vw;
-        width: 60vw;
-        height: 2em;
-    }
-
-    .button-users {
-        margin-right: 35px
-    }
-
-    .button4 { 
-        font-size: 2vw;
-        width: 1.5em;
-        height: 1.5em;
-        padding: 3px;
-    }
-
-    .button5 {
-        font-size: 2vw;
-        width: 1.5em;
-        height: 1.5em;
-        padding: 3px;
-    }  
-
-    .buttonRFID{ width: 60vw; }
 }
 
-@media only screen and (min-width: 768px) {
+
+@media only screen and (hover: hover) and (pointer: fine){
     /* For desktop: */
-   
     h1{ font-size: 3vw; }
     h2{ font-size: 2vw; }
-    h3{ font-size: 1.5vw; }
-
+    h3{ font-size: 1.75vw; }
+    
+    td{ 
+        font-size: 1.15vw; 
+        height: 1.5em;
+    }
     th{
-        font-size: 1.75vw;
+        font-size: 1.5vw;
         height: 2em;
     }
-
+    
     .table{ width: 40vw; }
-    .table tr{ height: 1em; }
-    .table td{ font-size: 1.2vw;}
-    .table td:last-child { max-width: 1em; }
-    .table2 td:last-child { min-width: 15vw; }
+    .access-table td:last-child { max-width: 7vw;}
 
-    input[type=text] {
-        font-size: 1.75vw;
-        width: 13vw;
-        height: 1.5em;
-    }
-
-    label{
-        font-size: 1.75vw;
-        width: 13vw;
-        height: 1.5em;
-    } 
-
-    .button-container{
-        display: block;
-        width: 30vw;
-        margin: 0 auto;
-    }  
-
+    .button-container{ width: 40vw; }  
+    
     .button {
         font-size: 1.5vw;
         width: 100%; 
         height: 2em;
     }
+    
+    .min-square-button { 
+        font-size: 1vw;
+        width: 1.5em;
+        height: 1.5em;
+        padding: 2px;
+    } 
 
-    .button4 { 
-        font-size: 1.2vw;
-        width: 1.2em;
-        height: 1.2em;
-        padding: 3px;
+    .data-button {
+        font-size: 1.15vw;
+        width: 1.5em;
+        height: 1.5em;
+        padding: 2px;
+    } 
+
+    .data-button-deactivate {
+        font-size: 1.15vw;
+        width: 1.5em;
+        height: 1.5em;
+        padding: 2px;
     }
-
-    .button5 {
-        font-size: 1.2vw;
-        width: 1.2em;
-        height: 1.2em;
-        padding: 3px;
-    }  
+    .data-button-deactivate:active { transform: none; }    
 
     .buttonRFID{ width: 30vw; }
+    
+    input[type=text] {
+        font-size: 1.75vw;
+        width: 13vw;
+        height: 1.5em;
+    }
+    
+    label{
+        font-size: 1.75vw;
+        width: 13vw;
+        height: 1.5em;
+    } 
 }

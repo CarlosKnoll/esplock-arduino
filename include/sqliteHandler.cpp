@@ -44,34 +44,43 @@ int db_exec(sqlite3 *db, const char *sql) {
    return rc;
 }
 
-String getData(){
-    message = "";
-    db_open("/spiffs/users.db", &db1);
-    rc = db_exec(db1, "SELECT * FROM users;");
     // error handler
     // if (rc != SQLITE_OK) {
     //     sqlite3_close(db1);
     //     return;
     // }
-    sqlite3_close(db1);
-    removeLastChar();
-    Serial.println("Message sending: " + message);
-    return message;
-}
+String getData(String numPage, String type){
+    String returnMessage = "";
+    String sql = "";
+    String olderID = "";
+    int offset = ((numPage.toInt()) - 1) * 10;
 
-String getAccess(){
     message = "";
     db_open("/spiffs/users.db", &db1);
-    rc = db_exec(db1, "SELECT * FROM access;");
-    // error handler
-    // if (rc != SQLITE_OK) {
-    //     sqlite3_close(db1);
-    //     return;
-    // }
+
+    if(type == "users"){
+        sql = "SELECT * FROM users ORDER BY id ASC LIMIT 1;";
+        rc = db_exec(db1, sql.c_str());
+        olderID = message.substring(0, message.indexOf(","));
+
+        message = "";
+        sql = "SELECT * FROM users ORDER BY id DESC LIMIT 10 OFFSET " + String(offset) + ";";
+        rc = db_exec(db1, sql.c_str());
+    }
+    else if(type == "access"){
+        sql = "SELECT * FROM access ORDER BY id ASC LIMIT 1;";
+        rc = db_exec(db1, sql.c_str());
+        olderID = message.substring(0, message.indexOf(","));
+
+        message = "";
+        sql = "SELECT * FROM access ORDER BY id DESC LIMIT 10 OFFSET " + String(offset) + ";";
+        rc = db_exec(db1, sql.c_str());
+    }
+
     sqlite3_close(db1);
     removeLastChar();
-    Serial.println("Message sending: " + message);
-    return message;
+    returnMessage = "oldestID=" + olderID + ";data=" + message;
+    return returnMessage;
 }
 
 void removeUser(int idDelete){

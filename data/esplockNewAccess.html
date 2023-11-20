@@ -2,21 +2,21 @@
     <head>
         <link rel="stylesheet" href="esplockstyle.css">
         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-        <script src='/userNewAccess.js'></script>
+        <script src='/esplockNewAccess.js'></script>
         <meta charset="UTF-8">
     </head>
     <body>
         <h1>ESPLOCK</h1>
         <h2>Página de acesso</h2>
-            <p>
-                <p><button id="RFID" class="button buttonRfid">Ler TAG RFID</button></p>
-            </p>
-            <div class ="readFeedback"> 
-                <h3 id="feedback"></span>
-            </div>
-            <div class="button-container">
-                <p><a href="/novouser"><button class="button">Adicionar</button></a></p>
-                <p><button onclick="history.back()" class="button button3">Retornar</button></a></p>
-            </div>
+        <div class="button-container">
+            <p><button id="RFID" class="button RFID-button">Ler TAG RFID</button></p>
+        </div>
+        <div class ="readFeedback"> 
+            <h3 id="feedback"></span>
+        </div>
+        <div class="button-container">
+            <p><a href="/novouser"><button class="button green-button">Adicionar</button></a></p>
+            <p><button onclick="history.back()" class="button red-button">Retornar</button></a></p>
+        </div>
     </body>
 </html>

@@ -1,7 +1,7 @@
 <html>
     <head>
         <link rel="stylesheet" href="esplockstyle.css">
-        <script src='/userdataHandler.js'></script>
+        <script src='/esplockUsers.js'></script>
         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
         <meta charset="UTF-8">
     </head>
@@ -9,7 +9,7 @@
         <h1>ESPLOCK</h1>
         <h2>Lista de Usuários</h2>
         <div class="table-container">
-            <table class = "table" id="usersTable">
+            <table class = "table users-table" id="usersTable">
               <thead>
                 <tr>
                   <th>Usuário</th>
@@ -19,6 +19,21 @@
               <tbody>
               </tbody>
             </table>
+            <table class="table" id="dataControl">
+              <tr class="spacer">
+                  <td colspan="3"><br> </td>
+              </tr>
+              <tr id="pageControl">
+              </tr>
+              <tr class="spacer">
+                  <td colspan="3"><br> </td>
+              </tr>
+          </table>        
+      </div>
+      <div class="button-container">
+          <p><a href="/novouser"><button class="button green-button">Adicionar</button></a></p>
+          <p><button onclick="history.back()" class="button red-button">Retornar</button></p>
+      </div>
         </div>
     </body>
 </html>
