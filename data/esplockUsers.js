@@ -41,7 +41,9 @@ function onMessage(event) {
         populateUsers();
         dataControl();
     }
-    if (checkData[0] == 'update'){
+    if (checkData[0] == 'updateUsers' || checkData[0] == 'success'){
+        alert('Lista de usuários modificada!');
+        numPage = 1;
         websocket.send('populateUsers;numPage=' + numPage);
     }
 }

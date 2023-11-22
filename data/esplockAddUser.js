@@ -38,7 +38,7 @@ function onMessage(event) {
     else if (event.data == 'cancel'){
         document.getElementById('tag').value = ""
     }
-    else if (event.data == 'update#add'){
+    else if (event.data == 'success#add'){
         document.getElementById('user').value = ""
         document.getElementById('tag').value = ""
         alert('Usuario adicionado')

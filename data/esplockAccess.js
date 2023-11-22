@@ -41,6 +41,11 @@ function onMessage(event) {
         populateTable();
         dataControl();
     }
+    if (checkData[0] == 'updateAccess'){
+        alert('Histórico de acessos modificado!');
+        numPage = 1;
+        websocket.send('populateAccess;numPage=' + numPage);
+    }
 }
 
 function populateTable(){

@@ -10,7 +10,7 @@ const int   daylightOffset_sec = 3600;
 
 void setupTime(){
   printMessage("Fetching current time...");
-  WiFi.begin("Paulo Knoll", "2444666668888888");
+  WiFi.begin("SSID", "PASSWORD");
 
   while(!timeClient.update()) {
     timeClient.forceUpdate();

@@ -12,7 +12,6 @@ void removeLastChar(){
 static int callback(void *data, int argc, char **argv, char **azColName) {
     int i;
     for (i = 0; i<argc; i++){
-        //Serial.printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
         message = message + ("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL") + ",";
     }
     Serial.printf("\n");
@@ -86,7 +85,6 @@ String getData(String numPage, String type){
 void removeUser(int idDelete){
     db_open("/spiffs/users.db", &db1);
     String sql = "DELETE FROM users WHERE id = " + String(idDelete) + ";";
-    Serial.println("SQL command: " + sql);
     rc = db_exec(db1, sql.c_str());
     sqlite3_close(db1);
 }
@@ -99,18 +97,15 @@ void dbCheck(String id){
     removeLastChar();
 
     if (message.equals("FALSE")){
-        Serial.print("Usuário não cadastrado");
         printMessage("Usuário não cadastrado");
     }  
     else{
-        Serial.print("Bem vindo(a) " + message);
         printMessage("Bem vindo(a) " + message);
     }
     sqlite3_close(db1);
 }
 
 String dbAccessCheck(String tag){
-    Serial.println("Getting check from access functions");
     dbCheck(tag);
     String user = message;
     if (message.equals("FALSE")){
@@ -170,7 +165,6 @@ void addUser(String usuario, String tag){
     rc = db_exec(db1, "SELECT MAX(id) FROM users;");
     removeLastChar();
     id = message.toInt() + 1;
-    Serial.println("ID: " + id);
     String sql = "INSERT INTO users VALUES(" + String(id) + ", '" + String(usuario) + "', '" + String(tag) + "');";
     rc = db_exec(db1, sql.c_str());
     sqlite3_close(db1);

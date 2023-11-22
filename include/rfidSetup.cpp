@@ -42,7 +42,6 @@ void checkCard(){
     }
     printHex(mfrc522.uid.uidByte, mfrc522.uid.size);
 
-    Serial.println("CheckCard TAG lida:" + id);
     digitalWrite(led, HIGH);
 
     dbCheck(id);
@@ -69,7 +68,6 @@ String newCard(){
     }
     printHex(mfrc522.uid.uidByte, mfrc522.uid.size);
 
-    Serial.println("newCard TAG lida:" + id);
     digitalWrite(led, HIGH);
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();

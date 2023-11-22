@@ -146,6 +146,9 @@ void loop(void){
     }
     if (user != ""){
         notifyRFID("NewAccess",user);
+        if (user != "FALSE"){
+            notifyUserData("updateAccess", "add", "all", 0);
+        }
         user = "";
         updateMode("");
     }

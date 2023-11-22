@@ -137,9 +137,14 @@ void beginServer(){
 // Send responses to client-side javascript
 
 // Users webpage
-void notifyUserData (String info, String response){ //Sends back raw db data
-  Serial.println("data: " + response);
-  ws.textAll(String (info) + "#" + String (response));
+void notifyUserData (String info, String response, String type, uint32_t client){ //Sends back raw db data
+  String message = String (info) + "#" + String (response);
+  if (type == "individual"){
+    ws.text(client,message);
+  }
+  else{
+  ws.textAll(message);
+  }
 }
 
 // New user webpage
@@ -152,7 +157,8 @@ void notifyError(){
 }
 
 // Websocket Handler
-void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
+void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t client) {
+  Serial.println("Client: " + String(client));
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
     data[len] = 0;
@@ -162,16 +168,14 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
       String message = (char*)data;
       String numPage = message.substring(message.indexOf(";numPage=") + 9);
       String response = getData(numPage, "users");
-      notifyUserData("users", response);
+      notifyUserData("users", response, "individual", client);
     }
 
     if (strstr((char*)data, "removeUser") != NULL) { //If message contains removeUser
       String message = (char*)data;
       int removalId = message.substring(11, message.indexOf(";numPage=")).toInt();
       removeUser(removalId);
-      String numPage = message.substring(message.indexOf(";numPage=") + 9);
-      String response = getData(numPage, "users");
-      notifyUserData("users", response);
+      notifyUserData("updateUsers", "add", "all", client);
     }
 
     //Test for messages from add new users webpage
@@ -185,28 +189,25 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
       }
       else{
         addUser(newUser, newID);
-        notifyUserData("update", "add");
+        notifyUserData("success", "add", "all", client);
       }
     }
 
     //Test for messages from access webpage
     if (strstr((char*)data, "populateAccess") != NULL) { //If message contains populateUsers
       String message = (char*)data;
-      Serial.println("Got the following message data: " + message);
       String numPage = message.substring(message.indexOf(";numPage=") + 9);
       String response = getData(numPage, "access");
-      notifyUserData("access", response);
+      notifyUserData("access", response, "individual", client);
     }
 
     //Test for messages regarding RFID readings
     if (strcmp((char*)data, "readRFID") == 0) { //If message = readRFID  
       String message = (char*)data;
-      Serial.println("Got the following message data: " + message);
       updateStatus("");
     }
     if (strcmp((char*)data, "cancelRFID") == 0) { //If message = cancelRFID
       String message = (char*)data;
-      Serial.println("Got the following message data: " + message);
       String uid = "";
       updateStatus(uid);
       updateMode(uid);
@@ -214,7 +215,6 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
     }
     if (strcmp((char*)data, "accessRFID") == 0) { //If message = acessRFID
       String message = (char*)data;
-      Serial.println("Got the following message data: " + message);
       updateMode("");
     }
   }
@@ -230,7 +230,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
       Serial.printf("WebSocket client #%u disconnected\n", client->id());
       break;
     case WS_EVT_DATA:
-      handleWebSocketMessage(arg, data, len);
+      handleWebSocketMessage(arg, data, len, client->id());
       break;
     case WS_EVT_PONG:
     case WS_EVT_ERROR:
