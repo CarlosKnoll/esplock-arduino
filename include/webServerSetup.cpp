@@ -1,4 +1,3 @@
-
 // ------------------------------------------------------------------
 // Set these to your desired credentials.
 // const char* host = "esp32";
@@ -9,9 +8,10 @@ String ipMsg;
 size_t content_len;
 
 // Set static IP:
-// IPAddress local_IP(192, 168, 200, 95);  // Set your Static IP address
-// IPAddress gateway(192, 168, 200, 1);    // Set your Gateway IP address
-// IPAddress subnet(255, 255, 255, 0);     // IP mask
+IPAddress IP(192, 168, 4, 1);  // Set your Static IP address
+IPAddress gateway(192, 168, 4, 1);    // Set your Gateway IP address
+IPAddress subnet(255, 255, 255, 0);     // IP mask
+IPAddress DHCP(192, 168, 4, 200);
 // IPAddress primaryDNS(8, 8, 8, 8);       //optional
 // IPAddress secondaryDNS(8, 8, 4, 4);     //optional
 
@@ -105,16 +105,21 @@ void setupAP(){
   printMessage(string2print);
   
   // Remove the password parameter, if you want the AP (Access Point) to be open
+  
   WiFi.softAP(ssid, password);
-
+  WiFi.softAPConfig(IP, gateway, subnet, DHCP);
+  Serial.println("SmartConfig received.");
+  esp_wifi_set_bandwidth(WIFI_IF_AP, WIFI_BW_HT20);
+  
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(IP);
 
-  
-
   String ip = IP.toString();
   ipMsg = "Success! " + ip;
+  Serial.println(WiFi.softAPIP());
+  Serial.println(WiFi.softAPBroadcastIP());
+  Serial.println(WiFi.softAPSubnetMask());
   printIP();
   
 }

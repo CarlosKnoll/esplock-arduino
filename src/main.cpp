@@ -31,6 +31,7 @@
    Kit Mauricio TTGO MAC 24-6F-28-25-50-F8
 */
 
+
 #include <Arduino.h>
 #include <heltec.h>
 #include <WiFi.h>
@@ -44,6 +45,7 @@
 #include <ESP32Time.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
+#include <esp_wifi.h>
 
 // -----------------------------------------------
 // Function prototypes
