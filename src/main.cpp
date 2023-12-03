@@ -55,12 +55,12 @@ void removeUser( int idDelete );
 void addUser(String usuario, String id);
 String newCard();
 void updateStatus(String message);
-void updateMode(String message);
 int checkTag(String newTag);
 String getData(String numPage, String type);
 String access();
 String dbAccessCheck(String tag);
 String returnTime();
+void clearDB();
 
 // -----------------------------------------------
 
@@ -73,7 +73,6 @@ String returnTime();
 
 String ipString;
 int newUserTag = LOW;
-int readUser = LOW;
 String newUser = "";
 String user = "";
 
@@ -84,21 +83,7 @@ void msgEspLock1() {
 }
 
 void updateStatus( String message ){
-    if (message == "cancel"){
-        readUser = LOW;
-    }
-    else{
-        newUserTag = !newUserTag;
-    }
-}
-
-void updateMode( String message ){
-    if (message == "cancel"){
-        readUser = LOW;
-    }
-    else{
-        readUser = !readUser;
-    }
+    newUserTag = !newUserTag;
 }
 
 // -----------------------------------------------
@@ -126,10 +111,6 @@ void setup(void)
 
 // -----------------------------------------------
 void loop(void){
-    if (newUserTag == 0 && readUser == 0){
-        checkCard();
-    }
-
     // If set to add new user
     if (newUserTag == 1){
         newUser = newCard();
@@ -141,7 +122,7 @@ void loop(void){
     }
 
     // If set to read user for access
-    if (readUser == 1){
+    if (newUserTag != 1){
         user = access();
     }
     if (user != ""){
@@ -150,6 +131,5 @@ void loop(void){
             notifyUserData("updateAccess", "add", "all", 0);
         }
         user = "";
-        updateMode("");
     }
 }

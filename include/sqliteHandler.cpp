@@ -170,6 +170,13 @@ void addUser(String usuario, String tag){
     sqlite3_close(db1);
 }
 
+void clearDB(){
+    message = "";
+    db_open("/spiffs/users.db", &db1);
+    rc = db_exec(db1, "DELETE FROM access;");
+    sqlite3_close(db1);
+}
+
 void beginDB() {
     sqlite3_initialize();
 }

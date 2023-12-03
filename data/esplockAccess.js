@@ -51,21 +51,23 @@ function onMessage(event) {
 function populateTable(){
     var table = document.getElementById('accessTable').tBodies[0];;
     table.innerHTML = "";
-    accessArray.forEach(element => {
-        const currentUser = element.split(",");
-        var tr = document.createElement('tr');
-        tr.id = currentUser[0];
-        if (currentUser[0] == oldestID){
-            maxPage = true;
-        }
-        else{
-            maxPage = false;
-        }
-        tr.innerHTML = '<td>' + currentUser[1] + '</td>' +
-        '<td>' + currentUser[2] + '</td>' +
-        '<td>' + currentUser[3] + '</td>'
-        table.appendChild(tr);
-    });
+    if(accessArray != ''){
+        accessArray.forEach(element => {
+            const currentUser = element.split(",");
+            var tr = document.createElement('tr');
+            tr.id = currentUser[0];
+            if (currentUser[0] == oldestID){
+                maxPage = true;
+            }
+            else{
+                maxPage = false;
+            }
+            tr.innerHTML = '<td>' + currentUser[1] + '</td>' +
+            '<td>' + currentUser[2] + '</td>' +
+            '<td>' + currentUser[3] + '</td>'
+            table.appendChild(tr);
+        })
+    }
 }
 
 function dataControl(){
@@ -105,4 +107,10 @@ function updateData(){
     var td = document.getElementById('numPage');
     td.innerHTML = numPage;
     websocket.send('populateAccess;numPage=' + numPage);
+}
+
+function clearDB(){
+    if(confirm('Confirma que deseja limpar os dados do banco de dados?')){
+        websocket.send('clear')
+    }
 }

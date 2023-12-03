@@ -66,6 +66,9 @@ td{
 .red-button {background-color: #eb4034;}
 .red-button:hover { background-color: #f7a099; }  
 
+.gray-button {background-color: #727272;}
+.gray-button:hover { background-color: #bbbaba; }  
+
 .x-button { 
     border-radius: 0px;
     background-color: #eb4034;
@@ -93,6 +96,8 @@ td{
 .RFID-button { background-color: #32beff; }
 .RFID-button:hover { background-color: #73cbf3; }
 
+
+
 label{
     display: table-cell;
 }
@@ -112,68 +117,65 @@ form>p {
     justify-content: center;
 } 
 
-@media only screen and (hover: none) and (pointer: coarse){
-    /* For mobile: */
-    h1{ font-size: 7.5vw; }
-    h2{ font-size: 6vw; }
-    h3{ font-size: 5vw; }
-    
-    td{ 
-        font-size: 3vw; 
-        height: 1.75em;
-    }
-    th{
-        font-size:3vw;
-        height: 2em;
-    }
+/* For mobile: */
+h1{ font-size: 7.5vw; }
+h2{ font-size: 6vw; }
+h3{ font-size: 5vw; }
 
-    .table{ width: 70vw; }
-
-    .button-container{ width: 100%; }  
-    
-    .button {
-        font-size: 4vw;
-        width: 70vw;
-        height: 2em;
-    }
-    
-    .min-square-button{
-        font-size: 2vw;
-        width: 1.5em;
-        height: 1.5em;
-        padding: 3px;
-    }
-
-    .data-button {
-        font-size: 3vw;
-        width: 1.5em;
-        height: 1.5em;
-        padding: 3px;
-    } 
-
-    .data-button-deactivate {
-        font-size: 3vw;
-        width: 1.5em;
-        height: 1.5em;
-        padding: 3px;
-    } 
-    .data-button-deactivate:active { transform: none; }    
-
-    .RFID-button{ width: 70vw; }
-    
-    input[type=text] {
-        font-size: 4.5vw;
-        width: 30vw;
-        height: 1.5em;
-    }
-    
-    label{
-        font-size: 4.5vw;
-        width: 30vw;
-        height: 1.5em;
-    } 
+td{ 
+    font-size: 3vw; 
+    height: 1.75em;
+}
+th{
+    font-size:3vw;
+    height: 2em;
 }
 
+.table{ width: 70vw; }
+
+.button-container{ width: 100%; }  
+
+.button {
+    font-size: 4vw;
+    width: 70vw;
+    height: 2em;
+}
+
+.min-square-button{
+    font-size: 2vw;
+    width: 1.5em;
+    height: 1.5em;
+    padding: 3px;
+}
+
+.data-button {
+    font-size: 3vw;
+    width: 1.5em;
+    height: 1.5em;
+    padding: 3px;
+} 
+
+.data-button-deactivate {
+    font-size: 3vw;
+    width: 1.5em;
+    height: 1.5em;
+    padding: 3px;
+} 
+.data-button-deactivate:active { transform: none; }    
+
+.RFID-button{ width: 70vw; }
+
+input[type=text] {
+    font-size: 4.5vw;
+    width: 30vw;
+    height: 1.5em;
+}
+
+label{
+    font-size: 4.5vw;
+    width: 30vw;
+    height: 1.5em;
+} 
 
 @media only screen and (hover: hover) and (pointer: fine){
     /* For desktop: */

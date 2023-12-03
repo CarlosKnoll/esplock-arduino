@@ -22,15 +22,22 @@ AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
 // ------------------------------------------------------------------
-// Test page
 int ledState = LOW;
+int flagTime = 0;
 #define led     25
 String msg="";
+ESP32Time rtc(-10800);
 
 // ------------------------------------------------------------------
 
 void printIP(){
   printMessage(ipMsg);
+}
+
+String returnTime(){
+  String date = rtc.getTime("%d/%m/%y %H:%M:%S");
+  Serial.println(date);
+  return date;
 }
 
 // ------------------------------------------------------------------
@@ -51,6 +58,9 @@ void setupWebPages(){
   });
   server.on("/main", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(SPIFFS, "/esplockMain.html", "text/html"); //webpage HTML
+  }); 
+  server.on("/esplockMain.js", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send(SPIFFS, "/esplockMain.js", "text/javascript"); //webpage HTML
   }); 
 
   // Users webpage
@@ -127,6 +137,7 @@ void setupOTAasync(){
 
 // ------------------------------------------------------------------
 void beginServer(){
+  flagTime = 0;
   server.begin();
 }
 
@@ -201,6 +212,12 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t clien
       notifyUserData("access", response, "individual", client);
     }
 
+    if (strcmp((char*)data, "clear") == 0) { //If message equals clear
+      Serial.println(String((char*)data));
+      clearDB();
+      notifyUserData("access", "add", "all", client);
+    }
+
     //Test for messages regarding RFID readings
     if (strcmp((char*)data, "readRFID") == 0) { //If message = readRFID  
       String message = (char*)data;
@@ -210,12 +227,50 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t clien
       String message = (char*)data;
       String uid = "";
       updateStatus(uid);
-      updateMode(uid);
       notifyRFID("cancel", uid);
     }
-    if (strcmp((char*)data, "accessRFID") == 0) { //If message = acessRFID
-      String message = (char*)data;
-      updateMode("");
+
+    //Test for time update
+    if (strstr((char*)data, "epoch") != NULL) { //If message contains epoch
+      if (flagTime == 0){
+        char *dados[3];
+        char *values[7];
+        char *ptr = NULL;
+        int index = 0;
+
+        ptr = strtok((char*)data, "=");
+        while (ptr != NULL){
+          dados[index] = ptr;
+          index++;
+          ptr = strtok(NULL, "=");
+        }
+
+        index = 0;
+        ptr = strtok(dados[1], ",");
+        while (ptr != NULL){
+          values[index] = ptr;
+          index++;
+          ptr = strtok(NULL, ",");
+        }
+
+        int s = atoi(values[0]);
+        int m = atoi(values[1]);
+        int h = atoi(values[2]);
+        int D = atoi(values[3]);
+        int M = atoi(values[4]) + 1;
+        int Y = atoi(values[5]);
+        
+  for (int n = 0; n < index; n++)
+  {
+     Serial.print(n);
+     Serial.print("  ");
+     Serial.println(values[n]);
+  }
+;
+        Serial.println(m);
+        rtc.setTime(s,m,h,D,M,Y);
+        flagTime = 1;
+      } 
     }
   }
 }
