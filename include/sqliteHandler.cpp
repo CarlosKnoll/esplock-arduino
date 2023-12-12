@@ -43,6 +43,45 @@ int db_exec(sqlite3 *db, const char *sql) {
    return rc;
 }
 
+String dbAccessCheck(String tag){
+    dbCheck(tag);
+    String user = message;
+    if (message.equals("FALSE")){
+        sqlite3_close(db1);
+        return message;
+    }
+    else{
+        String date = returnTime();
+        db_open("/spiffs/users.db", &db1);
+
+        message = "";
+        String sql = "SELECT name FROM users WHERE name == '" + user + "';";
+        rc = db_exec(db1, sql.c_str());
+        removeLastChar();
+        String usuario = message;
+
+        message = "";
+        sql = "SELECT tag FROM users WHERE name == '" + user + "';";
+        rc = db_exec(db1, sql.c_str());
+        removeLastChar();
+        String tag = message;
+
+        message = "";
+        rc = db_exec(db1, "SELECT MAX(id) FROM access;");
+        removeLastChar();
+        int id = message.toInt() + 1;
+
+        String returnMessage = usuario + ";" + tag;
+
+        sql = "INSERT INTO access VALUES(" + String(id) + ", '" + String(usuario) + "', '" + String(tag) + "', '" + String(date) + "');";
+        rc = db_exec(db1, sql.c_str());
+        removeLastChar();
+
+        sqlite3_close(db1);
+        return returnMessage;
+    }
+}
+
     // error handler
     // if (rc != SQLITE_OK) {
     //     sqlite3_close(db1);
@@ -103,45 +142,6 @@ void dbCheck(String id){
         printMessage("Bem vindo(a) " + message);
     }
     sqlite3_close(db1);
-}
-
-String dbAccessCheck(String tag){
-    dbCheck(tag);
-    String user = message;
-    if (message.equals("FALSE")){
-        sqlite3_close(db1);
-        return message;
-    }
-    else{
-        db_open("/spiffs/users.db", &db1);
-
-        message = "";
-        String sql = "SELECT name FROM users WHERE name == '" + user + "';";
-        rc = db_exec(db1, sql.c_str());
-        removeLastChar();
-        String usuario = message;
-
-        message = "";
-        sql = "SELECT tag FROM users WHERE name == '" + user + "';";
-        rc = db_exec(db1, sql.c_str());
-        removeLastChar();
-        String tag = message;
-
-        message = "";
-        rc = db_exec(db1, "SELECT MAX(id) FROM access;");
-        removeLastChar();
-        int id = message.toInt() + 1;
-
-        String date = returnTime();
-        String returnMessage = usuario + ";" + tag;
-
-        sql = "INSERT INTO access VALUES(" + String(id) + ", '" + String(usuario) + "', '" + String(tag) + "', '" + String(date) + "');";
-        rc = db_exec(db1, sql.c_str());
-        removeLastChar();
-
-        sqlite3_close(db1);
-        return returnMessage;
-    }
 }
 
 int checkTag(String id){

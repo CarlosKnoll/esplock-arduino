@@ -44,6 +44,7 @@
 #include <ESP32Time.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
+#include <NTPClient.h>
 
 // -----------------------------------------------
 // Function prototypes
@@ -61,6 +62,7 @@ String access();
 String dbAccessCheck(String tag);
 String returnTime();
 void clearDB();
+void timeUpdate(uint8_t *data);
 
 // -----------------------------------------------
 

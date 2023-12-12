@@ -14,13 +14,15 @@ function initWebSocket() {
 }
 function onOpen(event) {
     const d = new Date()
-    let message = "epoch="
+    message = ""
+    message += "epoch="
     message += (d.getSeconds() + ',') 
     message += (d.getMinutes() + ',')
     message += (d.getHours() + ',')
     message += (d.getDate() + ',')
     message += (d.getMonth() + ',')
     message += (d.getFullYear())
+    // message += Date.now()
     console.log(message)
     websocket.send(message)
 }

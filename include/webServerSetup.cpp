@@ -26,18 +26,12 @@ int ledState = LOW;
 int flagTime = 0;
 #define led     25
 String msg="";
-ESP32Time rtc(-10800);
+
 
 // ------------------------------------------------------------------
 
 void printIP(){
   printMessage(ipMsg);
-}
-
-String returnTime(){
-  String date = rtc.getTime("%d/%m/%y %H:%M:%S");
-  Serial.println(date);
-  return date;
 }
 
 // ------------------------------------------------------------------
@@ -215,7 +209,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t clien
     if (strcmp((char*)data, "clear") == 0) { //If message equals clear
       Serial.println(String((char*)data));
       clearDB();
-      notifyUserData("access", "add", "all", client);
+      notifyUserData("access", "", "all", client);
     }
 
     //Test for messages regarding RFID readings
@@ -233,42 +227,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t clien
     //Test for time update
     if (strstr((char*)data, "epoch") != NULL) { //If message contains epoch
       if (flagTime == 0){
-        char *dados[3];
-        char *values[7];
-        char *ptr = NULL;
-        int index = 0;
-
-        ptr = strtok((char*)data, "=");
-        while (ptr != NULL){
-          dados[index] = ptr;
-          index++;
-          ptr = strtok(NULL, "=");
-        }
-
-        index = 0;
-        ptr = strtok(dados[1], ",");
-        while (ptr != NULL){
-          values[index] = ptr;
-          index++;
-          ptr = strtok(NULL, ",");
-        }
-
-        int s = atoi(values[0]);
-        int m = atoi(values[1]);
-        int h = atoi(values[2]);
-        int D = atoi(values[3]);
-        int M = atoi(values[4]) + 1;
-        int Y = atoi(values[5]);
-        
-  for (int n = 0; n < index; n++)
-  {
-     Serial.print(n);
-     Serial.print("  ");
-     Serial.println(values[n]);
-  }
-;
-        Serial.println(m);
-        rtc.setTime(s,m,h,D,M,Y);
+        timeUpdate(data);
         flagTime = 1;
       } 
     }
