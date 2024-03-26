@@ -15,6 +15,7 @@
                 <th>Usuário</th>
                 <th>TAG</th>
                 <th>Data</th>
+                <th>Ação</th>
               </tr>
             </thead>
             <tbody>
@@ -22,18 +23,18 @@
           </table>
           <table class="table" id="dataControl">
             <tr class="spacer">
-              <td colspan="3"><br> </td>
+              <td colspan="4"><br> </td>
             </tr>
             <tr id="pageControl">
             </tr>
             <tr class="spacer">
-              <td colspan="3"><br> </td>
+              <td colspan="4"><br> </td>
             </tr>
           </table>        
         </div>
         <div class="button-container">
           <p><button onclick="clearDB()" class="button gray-button">Limpar</button></p>
-          <p><a href="/users.db"><button class="button RFID-button">Download</button></a></p>
+          <p><a onclick="getDB()"><button class="button RFID-button">Download</button></a></p>
           <p><button onclick="history.back()" class="button red-button">Retornar</button></p>
         </div>
       </div>

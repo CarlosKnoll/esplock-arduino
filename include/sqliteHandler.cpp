@@ -71,9 +71,26 @@ String dbAccessCheck(String tag){
         removeLastChar();
         int id = message.toInt() + 1;
 
+        message = "";
+        sql = "SELECT act FROM access WHERE name == '" + user + "' ORDER BY date DESC LIMIT 1;";
+        rc = db_exec(db1, sql.c_str());
+        removeLastChar();
+        String lastAct = message;
+
+        //entry or exit?
+        String newAct;
+        if (lastAct == "Entrada"){
+            newAct = "Saída";
+        }
+        else{
+            newAct = "Entrada";
+        }
+
+        Serial.println(lastAct);
+        Serial.println(newAct);
         String returnMessage = usuario + ";" + tag;
 
-        sql = "INSERT INTO access VALUES(" + String(id) + ", '" + String(usuario) + "', '" + String(tag) + "', '" + String(date) + "');";
+        sql = "INSERT INTO access VALUES(" + String(id) + ", '" + String(usuario) + "', '" + String(tag) + "', '" + String(date) + "', '" + String(newAct) + "');";
         rc = db_exec(db1, sql.c_str());
         removeLastChar();
 
@@ -117,6 +134,7 @@ String getData(String numPage, String type){
 
     sqlite3_close(db1);
     removeLastChar();
+    Serial.println(message);
     returnMessage = "oldestID=" + olderID + ";data=" + message;
     return returnMessage;
 }
@@ -172,9 +190,48 @@ void addUser(String usuario, String tag){
 
 void clearDB(){
     message = "";
-    db_open("/spiffs/users.db", &db1);
-    rc = db_exec(db1, "DELETE FROM access;");
     sqlite3_close(db1);
+    db_open("/spiffs/users.db", &db1);
+    rc = db_exec(db1, "DELETE FROM access");
+    sqlite3_close(db1);
+    
+    //Clear CSV file
+    File csv = SPIFFS.open("/access.csv", FILE_WRITE);
+    csv.close();
+}
+
+String getDB(){
+    message = "";
+    sqlite3_close(db1);
+    db_open("/spiffs/users.db", &db1);
+    rc = db_exec(db1, "SELECT name, tag, date, act FROM access;");
+    sqlite3_close(db1);
+    Serial.println(message);
+    File csv = SPIFFS.open("/access.csv", FILE_WRITE);
+    if (!csv){
+        Serial.println("Erro ao abrir csv.");
+    }
+    
+    // formatting csv
+
+    //headers
+    csv.print("Usuário,TAG,Data,Ação");
+    csv.println("");
+
+    //parsing content
+    for (int i = 0; i < message.length(); i++) {
+        char character = message.charAt(i);
+        if (character == ';'){
+            csv.println("");
+        }
+        else{
+            csv.print(message.charAt(i));
+        }
+    }
+
+    //csv.print(message);
+    csv.close();
+    return "csv";
 }
 
 void beginDB() {

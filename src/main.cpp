@@ -62,6 +62,7 @@ String access();
 String dbAccessCheck(String tag);
 String returnTime();
 void clearDB();
+String getDB();
 void timeUpdate(uint8_t *data);
 
 // -----------------------------------------------

@@ -45,6 +45,9 @@ void setupWebPages(){
   server.on("/users.db", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/users.db", "text/plain"); //users database
   });
+  server.on("/access.csv", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send(SPIFFS, "/access.csv", "text/plain", true); //csv for downloading the database
+  }); 
 
   // Main webpage
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -149,6 +152,7 @@ void notifyUserData (String info, String response, String type, uint32_t client)
   }
   else{
   ws.textAll(message);
+  Serial.println(message);
   }
 }
 
@@ -209,7 +213,13 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t clien
     if (strcmp((char*)data, "clear") == 0) { //If message equals clear
       Serial.println(String((char*)data));
       clearDB();
-      notifyUserData("access", "", "all", client);
+      notifyUserData("access", "empty", "all", client);
+    }
+
+    if (strcmp((char*)data, "get") == 0) { //If message equals get
+      Serial.println(String((char*)data));
+      String message = getDB();
+      notifyUserData("csv", "", "all", client);
     }
 
     //Test for messages regarding RFID readings

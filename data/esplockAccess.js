@@ -33,18 +33,26 @@ function onMessage(event) {
     let data = event.data;
     checkData = data.split("#")
     console.log(checkData)
-    if (checkData[0] == 'access'){
-        temp = checkData[1].split("=");
-        accessArray = temp[2].split(";");
-        temp = temp[1].split(";")
-        oldestID = temp[0];
-        populateTable();
-        dataControl();
+    if (checkData[1] == 'empty'){
+        location.reload();
     }
-    if (checkData[0] == 'updateAccess'){
-        alert('Histórico de acessos modificado!');
-        numPage = 1;
-        websocket.send('populateAccess;numPage=' + numPage);
+    else{
+        if (checkData[0] == 'access'){
+            temp = checkData[1].split("=");
+            accessArray = temp[2].split(";");
+            temp = temp[1].split(";")
+            oldestID = temp[0];
+            populateTable();
+            dataControl();
+        }
+        if (checkData[0] == 'updateAccess'){
+            alert('Histórico de acessos modificado!');
+            numPage = 1;
+            websocket.send('populateAccess;numPage=' + numPage);
+        }
+        if (checkData[0] == 'csv'){
+            window.location.href = 'access.csv';
+        }
     }
 }
 
@@ -64,7 +72,8 @@ function populateTable(){
             }
             tr.innerHTML = '<td>' + currentUser[1] + '</td>' +
             '<td>' + currentUser[2] + '</td>' +
-            '<td>' + currentUser[3] + '</td>'
+            '<td>' + currentUser[3] + '</td>' + 
+            '<td>' + currentUser[4] + '</td>' 
             table.appendChild(tr);
         })
     }
@@ -113,4 +122,12 @@ function clearDB(){
     if(confirm('Confirma que deseja limpar os dados do banco de dados?')){
         websocket.send('clear')
     }
+}
+
+function getDB(){
+    websocket.send('get')
+}
+
+function clearCSV(){
+    websocket.send('clearCSV')
 }
