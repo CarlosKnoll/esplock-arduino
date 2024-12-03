@@ -26,3 +26,7 @@ function onOpen(event) {
     console.log(message)
     websocket.send(message)
 }
+
+function deepSleep() {
+    websocket.send('deepSleep')
+}

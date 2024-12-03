@@ -105,14 +105,21 @@ void setupWebPages(){
 // ------------------------------------------------------------------
 void setupAP(){
   ssid = "ESP32-Access-Point";
-  password = "87654321"; 
+  password = "12345678"; 
 
   Serial.print("Setting AP (Access Point)…");
   String string2print = "Setting AP (Access Point)…";
   printMessage(string2print);
   
   // Remove the password parameter, if you want the AP (Access Point) to be open
+  WiFi.mode(WIFI_AP);
   WiFi.softAP(ssid, password);
+  delay(100);
+
+  Serial.println("Set softAPConfig");
+  IPAddress Ip(192, 168, 4, 1);
+  IPAddress NMask(255, 255, 255, 0);
+  WiFi.softAPConfig(Ip, Ip, NMask);
 
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
@@ -240,6 +247,11 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t clien
         timeUpdate(data);
         flagTime = 1;
       } 
+    }
+
+    //Test for deep sleep request
+    if (strcmp((char*)data, "deepSleep") == 0) { //If message = deepSleep
+      esp_deep_sleep_start();
     }
   }
 }

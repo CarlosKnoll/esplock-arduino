@@ -42,9 +42,9 @@
 #include <MFRC522.h>
 #include <sqlite3.h>
 #include <ESP32Time.h>
-#include <NTPClient.h>
+// #include <NTPClient.h>
 #include <WiFiUdp.h>
-#include <NTPClient.h>
+// #include <NTPClient.h>
 
 // -----------------------------------------------
 // Function prototypes
@@ -64,6 +64,7 @@ String returnTime();
 void clearDB();
 String getDB();
 void timeUpdate(uint8_t *data);
+void deepSleepSetup();
 
 // -----------------------------------------------
 
@@ -71,6 +72,7 @@ void timeUpdate(uint8_t *data);
 #include "heltecSetup.cpp"
 #include "rfidSetup.cpp"
 #include "sqliteHandler.cpp"
+#include "deepSleep.cpp"
 
 // -----------------------------------------------
 
@@ -106,6 +108,7 @@ void setup(void)
     initWebSocket();
     beginServer();
     beginDB();
+    deepSleepSetup();
 
     Serial.println("HTTP server started");
     ipString = "Success! " + ipMsg;
