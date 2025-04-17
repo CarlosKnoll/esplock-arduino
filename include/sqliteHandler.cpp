@@ -212,10 +212,11 @@ String getDB(){
         Serial.println("Erro ao abrir csv.");
     }
     
+    
     // formatting csv
 
     //headers
-    csv.print("Usuário,TAG,Data,Ação");
+    csv.print("Usuario,TAG,Data,Acao");
     csv.println("");
 
     //parsing content
@@ -235,5 +236,6 @@ String getDB(){
 }
 
 void beginDB() {
+    Serial.println("Initializing DB...");
     sqlite3_initialize();
 }

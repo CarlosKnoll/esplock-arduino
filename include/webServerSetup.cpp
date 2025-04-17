@@ -38,6 +38,7 @@ void printIP(){
 // Setup every webpage/file requests
 // ------------------------------------------------------------------
 void setupWebPages(){
+  Serial.println("Setting up web pages...");
   // General files
   server.on("/esplockstyle.css", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/esplockstyle.css", "text/css"); //css for html elements
@@ -137,10 +138,12 @@ void setupAP(){
 void setupOTAasync(){
   // Start ElegantOTA
   AsyncElegantOTA.begin(&server);
+  Serial.println("OTA started");
 }
 
 // ------------------------------------------------------------------
 void beginServer(){
+  Serial.println("Starting server...");
   flagTime = 0;
   server.begin();
 }
@@ -275,6 +278,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
 }
 
 void initWebSocket() {
+  Serial.println("Setting up WebSocket...");
   ws.onEvent(onEvent);
   server.addHandler(&ws);
 }

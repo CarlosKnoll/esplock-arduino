@@ -3,15 +3,34 @@
 #define RFID_MOSI 23
 #define RFID_MISO 19
 #define RFID_RST 22
+#define RFID_IRQ 2
 
 unsigned long UID[3];
 String id = "";
+unsigned long lastInterruptTime = 0;
 
 MFRC522 mfrc522(RFID_SDA, RFID_RST);  // Create MFRC522 instance
+
+void IRAM_ATTR cardIRQ() {
+    unsigned long currentTime = millis();
+    if (currentTime - lastInterruptTime > 500) {  // Simple debounce (500ms)
+        Serial.println("[INTERRUPT] IRQ Signal detected");
+        lastInterruptTime = currentTime;
+    }
+}
 
 void setupRFID(){
     SPI.begin(RFID_SCK, RFID_MISO, RFID_MOSI);
     mfrc522.PCD_Init();		// Init MFRC522
+
+    // Enable IRQ for RFID
+    mfrc522.PCD_WriteRegister(MFRC522::ComIEnReg, 0xA0);
+    mfrc522.PCD_WriteRegister(MFRC522::ComIrqReg, 0x00);
+    mfrc522.PCD_WriteRegister(MFRC522::DivIEnReg, 0x00);
+
+    pinMode(RFID_IRQ, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(RFID_IRQ), cardIRQ, FALLING);
+
     mfrc522.PCD_DumpVersionToSerial();	// Show details of PCD - MFRC522 Card Reader details
     Serial.println(F("Scan PICC to see UID, SAK, type, and data blocks..."));
 }

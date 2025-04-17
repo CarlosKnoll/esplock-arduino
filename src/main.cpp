@@ -44,7 +44,7 @@
 #include <ESP32Time.h>
 // #include <NTPClient.h>
 #include <WiFiUdp.h>
-// #include <NTPClient.h>
+#include <esp_sleep.h>
 
 // -----------------------------------------------
 // Function prototypes

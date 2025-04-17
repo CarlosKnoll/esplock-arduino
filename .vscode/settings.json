@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "functional": "cpp"
-    }
+        "functional": "cpp",
+        "esp32-hal-gpio.h": "c"
+    },
+    "idf.portWin": "COM3"
 }
