@@ -1,3 +1,5 @@
+#include "heltecSetup.h"
+
 ESP32Time rtc;
 struct tm timeinfo;
 
@@ -59,4 +61,13 @@ void printMessage( String string2print ){
   Heltec.display->drawString(0, 30, string2print);
   Heltec.display->drawString(0, 40, "======================");
   Heltec.display->display();
+}
+
+void printIP(){
+  printMessage(ipMsg);
+}
+
+void msgEspLock1() {
+  String string2print = "        ESPLOCK       ";
+  printMessage(string2print);
 }

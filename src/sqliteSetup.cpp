@@ -1,6 +1,8 @@
+#include "sqliteSetup.h"
+
 const char* data = "Callback function called";
 char *zErrMsg = 0;
-String message = "";
+String message;
 sqlite3 *db1;
 int rc;
 
@@ -85,9 +87,6 @@ String dbAccessCheck(String tag){
         else{
             newAct = "Entrada";
         }
-
-        Serial.println(lastAct);
-        Serial.println(newAct);
         String returnMessage = usuario + ";" + tag;
 
         sql = "INSERT INTO access VALUES(" + String(id) + ", '" + String(usuario) + "', '" + String(tag) + "', '" + String(date) + "', '" + String(newAct) + "');";
@@ -206,16 +205,16 @@ String getDB(){
     db_open("/spiffs/users.db", &db1);
     rc = db_exec(db1, "SELECT name, tag, date, act FROM access;");
     sqlite3_close(db1);
-    Serial.println(message);
     File csv = SPIFFS.open("/access.csv", FILE_WRITE);
     if (!csv){
         Serial.println("Erro ao abrir csv.");
     }
     
+    
     // formatting csv
 
     //headers
-    csv.print("Usuário,TAG,Data,Ação");
+    csv.print("Usuario,TAG,Data,Acao");
     csv.println("");
 
     //parsing content
@@ -235,5 +234,6 @@ String getDB(){
 }
 
 void beginDB() {
+    Serial.println("Initializing DB...");
     sqlite3_initialize();
 }

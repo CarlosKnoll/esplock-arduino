@@ -1,43 +1,19 @@
-
-// ------------------------------------------------------------------
-// Set these to your desired credentials.
-// const char* host = "esp32";
-const char *ssid;
-const char *password;
-String ipMsg;
+#include "main.h"
 
 size_t content_len;
 
-// Set static IP:
-// IPAddress local_IP(192, 168, 200, 95);  // Set your Static IP address
-// IPAddress gateway(192, 168, 200, 1);    // Set your Gateway IP address
-// IPAddress subnet(255, 255, 255, 0);     // IP mask
-// IPAddress primaryDNS(8, 8, 8, 8);       //optional
-// IPAddress secondaryDNS(8, 8, 4, 4);     //optional
-
-// Objects
-// WiFiServer server(80);
-// WebServer server(80);
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
-// ------------------------------------------------------------------
 int ledState = LOW;
 int flagTime = 0;
-#define led     25
 String msg="";
-
-
-// ------------------------------------------------------------------
-
-void printIP(){
-  printMessage(ipMsg);
-}
 
 // ------------------------------------------------------------------
 // Setup every webpage/file requests
 // ------------------------------------------------------------------
 void setupWebPages(){
+  Serial.println("Setting up web pages...");
   // General files
   server.on("/esplockstyle.css", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/esplockstyle.css", "text/css"); //css for html elements
@@ -96,53 +72,6 @@ void setupWebPages(){
   server.on("/saida", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", "saida");
   });
-}
-
-
-
-// ------------------------------------------------------------------
-// Setup as AP
-// ------------------------------------------------------------------
-void setupAP(){
-  ssid = "ESP32-Access-Point";
-  password = "12345678"; 
-
-  Serial.print("Setting AP (Access Point)…");
-  String string2print = "Setting AP (Access Point)…";
-  printMessage(string2print);
-  
-  // Remove the password parameter, if you want the AP (Access Point) to be open
-  WiFi.mode(WIFI_AP);
-  WiFi.softAP(ssid, password);
-  delay(100);
-
-  Serial.println("Set softAPConfig");
-  IPAddress Ip(192, 168, 4, 1);
-  IPAddress NMask(255, 255, 255, 0);
-  WiFi.softAPConfig(Ip, Ip, NMask);
-
-  IPAddress IP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(IP);
-
-  
-
-  String ip = IP.toString();
-  ipMsg = "Success! " + ip;
-  printIP();
-  
-}
-
-// ------------------------------------------------------------------
-void setupOTAasync(){
-  // Start ElegantOTA
-  AsyncElegantOTA.begin(&server);
-}
-
-// ------------------------------------------------------------------
-void beginServer(){
-  flagTime = 0;
-  server.begin();
 }
 
 // -----------------------------------------------
@@ -251,7 +180,9 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t clien
 
     //Test for deep sleep request
     if (strcmp((char*)data, "deepSleep") == 0) { //If message = deepSleep
-      esp_deep_sleep_start();
+      sleepSetup();
+      // esp_light_sleep_start();
+      // esp_restart();
     }
   }
 }
@@ -275,8 +206,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
 }
 
 void initWebSocket() {
+  Serial.println("Setting up WebSocket...");
   ws.onEvent(onEvent);
   server.addHandler(&ws);
 }
-
-// -----------------------------------------------

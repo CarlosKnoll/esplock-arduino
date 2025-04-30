@@ -1,5 +1,20 @@
 {
     "files.associations": {
-        "functional": "cpp"
+        "functional": "cpp",
+        "esp32-hal-touch.h": "c",
+        "touch_sensor.h": "c",
+        "soc_caps.h": "c",
+        "array": "cpp",
+        "deque": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp",
+        "regex": "cpp",
+        "*.tcc": "cpp",
+        "memory": "cpp",
+        "random": "cpp"
     }
 }
