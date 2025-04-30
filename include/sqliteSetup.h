@@ -33,6 +33,7 @@ int checkTag(String id);
 void addUser(String usuario, String tag);
 void clearDB();
 String getDB();
+void postAccess();
 void beginDB();
 
 

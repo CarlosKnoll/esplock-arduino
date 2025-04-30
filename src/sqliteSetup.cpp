@@ -50,6 +50,7 @@ String dbAccessCheck(String tag){
     String user = message;
     if (message.equals("FALSE")){
         sqlite3_close(db1);
+        postAccess();
         return message;
     }
     else{
@@ -94,6 +95,8 @@ String dbAccessCheck(String tag){
         removeLastChar();
 
         sqlite3_close(db1);
+        delay(500);
+        postAccess();
         return returnMessage;
     }
 }
@@ -159,14 +162,6 @@ void dbCheck(String id){
         printMessage("Bem vindo(a)\n" + message);
     }
     sqlite3_close(db1);
-    delay(500);
-    if (stayAwake == false){
-        sleepSetup();
-    }
-    else{
-        msgEspLock1();
-    }
-    
     
 }
 
@@ -240,6 +235,15 @@ String getDB(){
     //csv.print(message);
     csv.close();
     return "csv";
+}
+
+void postAccess(){
+    if (stayAwake == false){
+        sleepSetup();
+    }
+    else{
+        msgEspLock1();
+    }
 }
 
 void beginDB() {

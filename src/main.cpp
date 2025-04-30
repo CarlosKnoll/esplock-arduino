@@ -7,32 +7,31 @@ bool stayAwake = false;
 void setup(void)
 {
     Serial.begin(115200);
-    rtc_gpio_deinit(GPIO_NUM_2);         // Ensure RTC control is allowed
-    rtc_gpio_pullup_en(GPIO_NUM_2);      // Enable pull-up on GPIO 2
     setupRFID();
     
     bool cardDetected = checkForCard();
 
     Serial.println("[WAKE] Wakeup reason: " + String(wakeup_reason));
     switch (wakeup_reason) {
-        case ESP_SLEEP_WAKEUP_EXT1:
-            Serial.println("[WAKE] Woke up by BUTTON press. Staying awake for user action.");
-            stayAwake = true;
-            initializeModules();
-            break;
-
         case ESP_SLEEP_WAKEUP_TIMER:
             stayAwake = false;
             Serial.println("[WAKE] Woke up by timer. Checking for card...");
-            if (!cardDetected) {
-                Serial.println("[SLEEP] No card detected. Going to sleep...");
-                sleepSetup();
-                // initializeModules();
-                break;
-            } else {
-                Serial.println("[ACTIVE] Card found. Staying awake for now.");
+            if (digitalRead(GPIO_NUM_12) == LOW) {
+                stayAwake = true;
                 initializeModules();
-            break;
+                delay(10);
+                break;
+            } else{
+                if (!cardDetected) {
+                    Serial.println("[SLEEP] No card detected. Going to sleep...");
+                    sleepSetup();
+                    break;
+                } else {
+                    Serial.println("[ACTIVE] Card found. Staying awake for now.");
+                    initializeModules();
+                    access();
+                break;
+            }
 
         default:
             stayAwake = true;

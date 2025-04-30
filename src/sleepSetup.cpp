@@ -1,14 +1,10 @@
 #include "sleepSetup.h"
 
 void sleepSetup() {
+    rtc_gpio_deinit(GPIO_NUM_12);         // Ensure RTC control is allowed
+    rtc_gpio_pullup_en(GPIO_NUM_12);      // Enable pull-up on GPIO 2
+    rtc_gpio_pulldown_dis(GPIO_NUM_12);   // Disable pull-down on GPIO 2
     esp_sleep_enable_timer_wakeup(1000); // Wake up every 500 ms
-    // esp_sleep_enable_ext0_wakeup(GPIO_NUM_2, 0);
-    // Make sure button isn't already pressed before enabling EXT1
-    while (digitalRead(GPIO_NUM_2) == LOW) {
-        Serial.println("Button pressed — wait to arm EXT1 wakeup...");
-        delay(10);
-    }
-    esp_sleep_enable_ext1_wakeup(GPIO_SEL_2, ESP_EXT1_WAKEUP_ALL_LOW);
     delay(100); // Let pin state settle
     esp_deep_sleep_start();
 }
