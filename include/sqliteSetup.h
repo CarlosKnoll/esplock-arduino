@@ -6,6 +6,8 @@
 #include <SPIFFS.h>
 #include "heltecSetup.h"
 #include "rfidSetup.h"
+#include "main.h"
+#include "sleepSetup.h"
 
 
 // ----------------------------------------------------------------------------

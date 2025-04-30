@@ -23,6 +23,7 @@
 // Global variables
 
 extern String ipString;
+extern bool stayAwake;
 
 // -----------------------------------------------
 // Inclusion of custom header files

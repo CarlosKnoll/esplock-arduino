@@ -46,6 +46,7 @@ void timeUpdate(uint8_t *data){
         timeinfo.tm_sec = s;
 
 	      rtc.setTimeStruct(timeinfo); 
+        msgEspLock1();
 }
 
 void setupHeltec(){
@@ -57,9 +58,7 @@ void printMessage( String string2print ){
   Heltec.display->clear();
   Heltec.display->setTextAlignment(TEXT_ALIGN_LEFT);
   Heltec.display->setFont(ArialMT_Plain_10);
-  Heltec.display->drawString(0, 20, "======================");
-  Heltec.display->drawString(0, 30, string2print);
-  Heltec.display->drawString(0, 40, "======================");
+  Heltec.display->drawString(0, 25, string2print);
   Heltec.display->display();
 }
 
@@ -68,6 +67,6 @@ void printIP(){
 }
 
 void msgEspLock1() {
-  String string2print = "        ESPLOCK       ";
+  String string2print = "ESPLOCK";
   printMessage(string2print);
 }

@@ -2,27 +2,27 @@
 
 String ipString;
 esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
-
+bool stayAwake = false;
 // -----------------------------------------------
 void setup(void)
 {
     Serial.begin(115200);
-    // pinMode(BUTTON_PIN, INPUT);
-    // rtc_gpio_deinit(GPIO_NUM_2);         // Ensure RTC control is allowed
-    // rtc_gpio_pullup_dis(GPIO_NUM_2);      // Enable internal pull-up (optional if external used)
-    // rtc_gpio_pulldown_en(GPIO_NUM_2);      // Enable internal pull-down (optional if external used)
+    rtc_gpio_deinit(GPIO_NUM_2);         // Ensure RTC control is allowed
+    rtc_gpio_pullup_en(GPIO_NUM_2);      // Enable pull-up on GPIO 2
     setupRFID();
     
     bool cardDetected = checkForCard();
 
     Serial.println("[WAKE] Wakeup reason: " + String(wakeup_reason));
     switch (wakeup_reason) {
-        case ESP_SLEEP_WAKEUP_EXT0:
+        case ESP_SLEEP_WAKEUP_EXT1:
             Serial.println("[WAKE] Woke up by BUTTON press. Staying awake for user action.");
+            stayAwake = true;
             initializeModules();
             break;
 
         case ESP_SLEEP_WAKEUP_TIMER:
+            stayAwake = false;
             Serial.println("[WAKE] Woke up by timer. Checking for card...");
             if (!cardDetected) {
                 Serial.println("[SLEEP] No card detected. Going to sleep...");
@@ -35,12 +35,11 @@ void setup(void)
             break;
 
         default:
+            stayAwake = true;
             Serial.println("[BOOT] Fresh boot or unknown wakeup. Init RFID and check.");
-            if (!checkForCard()) {
-                Serial.println("[SLEEP] No card detected. Going to sleep...");
-                sleepSetup();
-                break;
-            }
+            initializeModules();
+            printMessage("ESPLOCK reiniciado.\n Atualize o horario.");
+            break;
         }
     }
 }
@@ -79,6 +78,7 @@ void initializeModules(){
     setupWebPages();
     initWebSocket();
     beginServer();
+    setupDNS();
     beginDB();
 
     pinMode(led, OUTPUT);

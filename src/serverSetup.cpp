@@ -36,4 +36,15 @@ void beginServer(){
   flagTime = 0;
   server.begin();
 }
+
+void setupDNS(){
+  if (!MDNS.begin("esplock")) {
+    Serial.println("Error setting up MDNS responder!");
+    while (1) {
+      delay(500);
+    }
+  }
+  Serial.println("MDNS started.");
+  MDNS.addService("http", "tcp", 80);
+}
   

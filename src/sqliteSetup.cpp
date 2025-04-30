@@ -156,9 +156,18 @@ void dbCheck(String id){
         printMessage("Usuário não cadastrado");
     }  
     else{
-        printMessage("Bem vindo(a) " + message);
+        printMessage("Bem vindo(a)\n" + message);
     }
     sqlite3_close(db1);
+    delay(500);
+    if (stayAwake == false){
+        sleepSetup();
+    }
+    else{
+        msgEspLock1();
+    }
+    
+    
 }
 
 int checkTag(String id){
