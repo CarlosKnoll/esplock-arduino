@@ -70,6 +70,9 @@ function populateTable(){
             else{
                 maxPage = false;
             }
+            [date, time] = currentUser[3].split(' ');
+            [month, day, year] = date.split('/');
+            currentUser[3] = `${day}/${month}/${year} ${time}`
             tr.innerHTML = '<td>' + currentUser[1] + '</td>' +
             '<td>' + currentUser[2] + '</td>' +
             '<td>' + currentUser[3] + '</td>' + 
