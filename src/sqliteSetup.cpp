@@ -19,6 +19,7 @@ static int callback(void *data, int argc, char **argv, char **azColName) {
     Serial.printf("\n");
     removeLastChar();
     message += ";";
+    Serial.println(message);
     return 0;
 }
 
@@ -197,10 +198,6 @@ void clearDB(){
     db_open("/spiffs/users.db", &db1);
     rc = db_exec(db1, "DELETE FROM access");
     sqlite3_close(db1);
-    
-    //Clear CSV file
-    File csv = SPIFFS.open("/access.csv", FILE_WRITE);
-    csv.close();
 }
 
 String getDB(){
@@ -209,32 +206,44 @@ String getDB(){
     db_open("/spiffs/users.db", &db1);
     rc = db_exec(db1, "SELECT name, tag, date, act FROM access;");
     sqlite3_close(db1);
-    File csv = SPIFFS.open("/access.csv", FILE_WRITE);
-    if (!csv){
-        Serial.println("Erro ao abrir csv.");
-    }
-    
-    
-    // formatting csv
 
-    //headers
-    csv.print("Usuario,TAG,Data,Acao");
-    csv.println("");
+    // Start with UTF-8 BOM
+    String csv = "\xEF\xBB\xBF";  // BOM
+    csv += "Usuário,TAG,Data,Ação\n";
 
-    //parsing content
-    for (int i = 0; i < message.length(); i++) {
-        char character = message.charAt(i);
-        if (character == ';'){
-            csv.println("");
+    // Format message content into CSV
+    int col = 0;
+    String field = "";
+    for (int i = 0; i < message.length(); ) {
+        field = "";
+        // Extract each field until comma or semicolon
+        while (i < message.length() && message.charAt(i) != ',' && message.charAt(i) != ';') {
+            field += message.charAt(i++);
         }
-        else{
-            csv.print(message.charAt(i));
+    
+        // Reformat date if it's the third column
+        if (col == 2 && field.length() >= 17) {  // MM/DD/YY HH:mm:ss
+            String mm = field.substring(0, 2);
+            String dd = field.substring(3, 5);
+            String yy = field.substring(6, 8);
+            String time = field.substring(9);
+            field = dd + "/" + mm + "/20" + yy + " " + time;
         }
+    
+        csv += field;
+    
+        if (message.charAt(i) == ';') {
+            csv += '\n';
+            col = 0;
+        } else {
+            csv += ',';
+            col++;
+        }
+    
+        i++; // skip the comma or semicolon
     }
 
-    //csv.print(message);
-    csv.close();
-    return "csv";
+    return csv;
 }
 
 void postAccess(){

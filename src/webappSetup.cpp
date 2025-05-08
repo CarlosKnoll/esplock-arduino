@@ -154,8 +154,8 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t clien
 
     if (strcmp((char*)data, "get") == 0) { //If message equals get
       Serial.println(String((char*)data));
-      String message = getDB();
-      notifyUserData("csv", "", "all", client);
+      String csvData = getDB();
+      notifyUserData("csv", csvData, "individual", client);
     }
 
     //Test for messages regarding RFID readings

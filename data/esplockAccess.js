@@ -51,7 +51,26 @@ function onMessage(event) {
             websocket.send('populateAccess;numPage=' + numPage);
         }
         if (checkData[0] == 'csv'){
-            window.location.href = 'access.csv';
+            const csvContent = checkData[1];
+            console.log("CSV Content received:", csvContent);  // Log the raw CSV content
+
+
+            // Format: DD-MM-YYYY_HH-mm-ss
+            const now = new Date();
+            const pad = (n) => n.toString().padStart(2, '0');
+            const timestamp = `${pad(now.getDate())}-${pad(now.getMonth()+1)}-${now.getFullYear()}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+            const filename = `access_${timestamp}.csv`;
+
+            // Create a Blob with BOM and set MIME type to CSV
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        
+            // Create a link and trigger download
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     }
 }
