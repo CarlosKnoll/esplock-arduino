@@ -161,6 +161,7 @@ void dbCheck(String id){
     }  
     else{
         printMessage("Bem vindo(a)\n" + message);
+        digitalWrite(led, HIGH);
     }
     sqlite3_close(db1);
     
