@@ -50,9 +50,12 @@ void checkCard(){
     // Look for new cards
 	if ( ! mfrc522.PICC_IsNewCardPresent()) {
         digitalWrite(led, LOW);
+        digitalWrite(relay1, LOW);
+        digitalWrite(relay2, LOW);
 		return;
 	}
 
+    digitalWrite(led, HIGH);
 	// Select one of the cards
 	if ( ! mfrc522.PICC_ReadCardSerial()) {
 		return;
@@ -74,6 +77,8 @@ String newCard(){
     id = "";
     if ( ! mfrc522.PICC_IsNewCardPresent()) {
         digitalWrite(led, LOW);
+        digitalWrite(relay1, LOW);
+        digitalWrite(relay2, LOW);
         return "";
 	}
     else{
@@ -83,6 +88,7 @@ String newCard(){
 		return "";
 	}
 
+    digitalWrite(led, HIGH);
     for (byte i = 0; i < 4; i++) {
         UID[i] = mfrc522.uid.uidByte[i];
     }

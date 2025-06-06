@@ -37,6 +37,6 @@ extern bool stayAwake;
 
 // -----------------------------------------------
 // Function prototypes
-void initializeModules();
+void initializeModules(int moduleControl);
 
 #endif

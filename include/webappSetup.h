@@ -10,6 +10,8 @@
 // -----------------------------------------------
 // Global variables
 #define led 25
+#define relay1 14
+#define relay2 27
 
 extern size_t content_len;
 

@@ -96,7 +96,14 @@ String dbAccessCheck(String tag){
         removeLastChar();
 
         sqlite3_close(db1);
-        delay(500);
+
+        digitalWrite(relay1, HIGH);
+        delay(1000); //temp delay simulating step-up actuation
+        digitalWrite(relay1, LOW);
+        digitalWrite(relay2, HIGH);
+        delay(2000); //temp delay simulating lock actuation
+        digitalWrite(relay2, LOW);
+
         postAccess();
         return returnMessage;
     }
@@ -161,7 +168,6 @@ void dbCheck(String id){
     }  
     else{
         printMessage("Bem vindo(a)\n" + message);
-        digitalWrite(led, HIGH);
     }
     sqlite3_close(db1);
     

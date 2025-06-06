@@ -16,19 +16,19 @@ void setup(void)
         case ESP_SLEEP_WAKEUP_TIMER:
             stayAwake = false;
             Serial.println("[WAKE] Woke up by timer. Checking for card...");
-            if (digitalRead(GPIO_NUM_12) == LOW) {
+            if (digitalRead(GPIO_NUM_13) == LOW) {
                 stayAwake = true;
-                initializeModules();
+                initializeModules(0);
                 delay(10);
                 break;
             } else{
                 if (!cardDetected) {
-                    Serial.println("[SLEEP] No card detected. Going to sleep...");
+                    Serial.println("[WAKE] No card detected. Going to sleep...");
                     sleepSetup();
                     break;
                 } else {
-                    Serial.println("[ACTIVE] Card found. Staying awake for now.");
-                    initializeModules();
+                    Serial.println("[WAKE] Card found. Staying awake for now.");
+                    initializeModules(1);
                     access();
                 break;
             }
@@ -36,7 +36,7 @@ void setup(void)
         default:
             stayAwake = true;
             Serial.println("[BOOT] Fresh boot or unknown wakeup. Init RFID and check.");
-            initializeModules();
+            initializeModules(0);
             printMessage("ESPLOCK reiniciado.\n Atualize o horario.");
             break;
         }
@@ -70,17 +70,28 @@ void loop(void){
 
 // -----------------------------------------------
 
-void initializeModules(){
-    setupHeltec();
-    setupAP();
-    setupOTAasync();
-    setupWebPages();
-    initWebSocket();
-    beginServer();
-    setupDNS();
-    beginDB();
+void initializeModules(int moduleControl){
+    Serial.println("[WAKE] moduleControl: " + String(moduleControl));
+    if (moduleControl == 0){
+        setupHeltec();
+        setupAP();
+        setupOTAasync();
+        setupWebPages();
+        initWebSocket();
+        beginServer();
+        setupDNS();
+        beginDB();
+    }
+    else{
+        setupHeltec();
+        beginDB();
+    }
+
 
     pinMode(led, OUTPUT);
+    pinMode(relay1, OUTPUT);
+    pinMode(relay2, OUTPUT);
+
     msgEspLock1();
 
     Serial.println("HTTP server started");
