@@ -6,6 +6,8 @@ bool stayAwake = false;
 // -----------------------------------------------
 void setup(void)
 {
+    pinMode(wakeMonitor, OUTPUT);
+    digitalWrite(wakeMonitor, HIGH);
     Serial.begin(115200);
     setupRFID();
     

@@ -109,11 +109,20 @@ void updateStatus( String message ){
 }
 
 String access(){
+    String date = rtc.getTime("%m/%d/%y");
     String tag = newCard();
-    if (tag != ""){
-        return dbAccessCheck(tag);
-    }
-    else {
+    if (date == "01/01/70"){
+        printMessage("ESPLOCK\n Atualize o horario.");
         return "";
     }
+    else{
+        if (tag != ""){
+            return dbAccessCheck(tag);
+        }
+        else {
+            printMessage("ESPLOCK");
+            return "";
+        }
+    }
+
 }

@@ -9,7 +9,6 @@
 
 // -----------------------------------------------
 // Global variables
-#define led 25
 #define relay1 14
 #define relay2 27
 
@@ -19,7 +18,7 @@ extern AsyncWebServer server;
 extern AsyncWebSocket ws;
 
 extern int ledState;
-extern int flagTime;
+extern bool flagTime;
 
 extern String msg;
 

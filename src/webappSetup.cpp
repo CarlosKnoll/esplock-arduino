@@ -6,7 +6,7 @@ AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
 int ledState = LOW;
-int flagTime = 0;
+bool flagTime = false;
 String msg="";
 
 // ------------------------------------------------------------------
@@ -84,6 +84,7 @@ void setupWebPages(){
 void notifyUserData (String info, String response, String type, uint32_t client){ //Sends back raw db data
   String message = String (info) + "#" + String (response);
   if (type == "individual"){
+    Serial.println("[DEBUG] Sending message to the client: " + String(client));
     ws.text(client,message);
   }
   else{
@@ -153,9 +154,12 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t clien
     }
 
     if (strcmp((char*)data, "get") == 0) { //If message equals get
-      Serial.println(String((char*)data));
-      String csvData = getDB();
-      notifyUserData("csv", csvData, "individual", client);
+      Serial.println("[WEBAPP] Received WS message: " + String((char*)data));
+      Serial.println("[DEBUG] Received WS message from client: " + String(client));
+      getDBAsync(client);
+      // String csvData = getDB();
+      // Serial.println("[DEBUG] CSV Data: " + csvData + "; length: " + String(csvData.length()) + "; Returning data.");
+      // notifyUserData("csv", csvData, "individual", client);
     }
 
     //Test for messages regarding RFID readings
@@ -172,9 +176,10 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t clien
 
     //Test for time update
     if (strstr((char*)data, "epoch") != NULL) { //If message contains epoch
-      if (flagTime == 0){
+      if (flagTime == false){
         timeUpdate(data);
-        flagTime = 1;
+        flagTime = true;
+        printMessage("ESPLOCK");
       } 
     }
 

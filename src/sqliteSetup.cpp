@@ -5,6 +5,7 @@ char *zErrMsg = 0;
 String message;
 sqlite3 *db1;
 int rc;
+AsyncWebSocketClient* clientRef = nullptr;
 
 void removeLastChar(){
     int lc = message.length()-1;
@@ -16,10 +17,10 @@ static int callback(void *data, int argc, char **argv, char **azColName) {
     for (i = 0; i<argc; i++){
         message = message + ("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL") + ",";
     }
-    Serial.printf("\n");
+    //Serial.printf("\n");
     removeLastChar();
     message += ";";
-    Serial.println(message);
+    //Serial.println(message);
     return 0;
 }
 
@@ -144,7 +145,7 @@ String getData(String numPage, String type){
 
     sqlite3_close(db1);
     removeLastChar();
-    Serial.println(message);
+    //Serial.println(message);
     returnMessage = "oldestID=" + olderID + ";data=" + message;
     return returnMessage;
 }
@@ -207,6 +208,30 @@ void clearDB(){
     sqlite3_close(db1);
 }
 
+void getDBAsync(uint32_t client) {
+    xTaskCreatePinnedToCore(
+        buildCSVTask,
+        "CSVBuilder",
+        8192,     // Stack size
+        (void*)client,
+        1,
+        NULL,
+        1         // Core 1
+    );
+}
+
+void buildCSVTask(void* param) {
+    uint32_t client = (uint32_t)param;
+
+    String csv = getDB();
+
+    if (client) {
+        notifyUserData("csv", csv, "individual", client);
+    }
+
+    vTaskDelete(NULL);  // Don't forget this!
+}
+
 String getDB(){
     message = "";
     sqlite3_close(db1);
@@ -238,6 +263,7 @@ String getDB(){
         }
     
         csv += field;
+        yield(); // Allow other tasks to run
     
         if (message.charAt(i) == ';') {
             csv += '\n';

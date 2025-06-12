@@ -25,6 +25,9 @@
 extern String ipString;
 extern bool stayAwake;
 
+#define led 25
+#define wakeMonitor 12
+
 // -----------------------------------------------
 // Inclusion of custom header files
 

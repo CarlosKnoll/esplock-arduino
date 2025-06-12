@@ -17,6 +17,7 @@ extern char *zErrMsg;
 extern String message;
 extern sqlite3 *db1;
 extern int rc;
+extern AsyncWebSocketClient* clientRef;
 
 
 // ----------------------------------------------------------------------------
@@ -33,6 +34,8 @@ int checkTag(String id);
 void addUser(String usuario, String tag);
 void clearDB();
 String getDB();
+void buildCSVTask(void* param);
+void getDBAsync(uint32_t client);
 void postAccess();
 void beginDB();
 

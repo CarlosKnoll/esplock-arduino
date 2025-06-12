@@ -1,4 +1,5 @@
 #include "serverSetup.h"
+#include "webappSetup.h"
 
 IPAddress Ip(192, 168, 4, 1);
 IPAddress NMask(255, 255, 255, 0);
@@ -33,7 +34,7 @@ void setupOTAasync(){
   
 void beginServer(){
   Serial.println("Starting server...");
-  flagTime = 0;
+  flagTime = false;
   server.begin();
 }
 
