@@ -13,7 +13,7 @@ void setup(void)
     
     bool cardDetected = checkForCard();
 
-    Serial.println("[WAKE] Wakeup reason: " + String(wakeup_reason));
+    Serial.println("[BOOT] Wakeup reason: " + String(wakeup_reason));
     switch (wakeup_reason) {
         case ESP_SLEEP_WAKEUP_TIMER:
             stayAwake = false;
@@ -29,7 +29,7 @@ void setup(void)
                     sleepSetup();
                     break;
                 } else {
-                    Serial.println("[WAKE] Card found. Staying awake for now.");
+                    Serial.println("[WAKE] Card found. Staying awake.");
                     initializeModules(1);
                     access();
                 break;
@@ -73,7 +73,6 @@ void loop(void){
 // -----------------------------------------------
 
 void initializeModules(int moduleControl){
-    Serial.println("[WAKE] moduleControl: " + String(moduleControl));
     if (moduleControl == 0){
         setupHeltec();
         setupAP();
@@ -96,6 +95,5 @@ void initializeModules(int moduleControl){
 
     msgEspLock1();
 
-    Serial.println("HTTP server started");
     ipString = "Success! " + ipMsg;
 }

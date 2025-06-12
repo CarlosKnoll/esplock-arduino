@@ -13,7 +13,7 @@ String msg="";
 // Setup every webpage/file requests
 // ------------------------------------------------------------------
 void setupWebPages(){
-  Serial.println("Setting up web pages...");
+  Serial.println("[WEBAPP] Setting up web pages...");
   // General files
   server.on("/esplockstyle.css", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/esplockstyle.css", "text/css"); //css for html elements
@@ -84,12 +84,11 @@ void setupWebPages(){
 void notifyUserData (String info, String response, String type, uint32_t client){ //Sends back raw db data
   String message = String (info) + "#" + String (response);
   if (type == "individual"){
-    Serial.println("[DEBUG] Sending message to the client: " + String(client));
     ws.text(client,message);
   }
   else{
   ws.textAll(message);
-  Serial.println(message);
+  Serial.println("[WS] Response: " + message);
   }
 }
 
@@ -104,7 +103,7 @@ void notifyError(){
 
 // Websocket Handler
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t client) {
-  Serial.println("Client: " + String(client));
+  Serial.println("[WS] Received WS message: " + String((char*)data) + "; client: " + String(client));
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
     data[len] = 0;
@@ -148,18 +147,12 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t clien
     }
 
     if (strcmp((char*)data, "clear") == 0) { //If message equals clear
-      Serial.println(String((char*)data));
       clearDB();
       notifyUserData("access", "empty", "all", client);
     }
 
     if (strcmp((char*)data, "get") == 0) { //If message equals get
-      Serial.println("[WEBAPP] Received WS message: " + String((char*)data));
-      Serial.println("[DEBUG] Received WS message from client: " + String(client));
       getDBAsync(client);
-      // String csvData = getDB();
-      // Serial.println("[DEBUG] CSV Data: " + csvData + "; length: " + String(csvData.length()) + "; Returning data.");
-      // notifyUserData("csv", csvData, "individual", client);
     }
 
     //Test for messages regarding RFID readings
@@ -186,8 +179,6 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t clien
     //Test for deep sleep request
     if (strcmp((char*)data, "deepSleep") == 0) { //If message = deepSleep
       sleepSetup();
-      // esp_light_sleep_start();
-      // esp_restart();
     }
   }
 }
@@ -196,10 +187,10 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
              void *arg, uint8_t *data, size_t len) {
   switch (type) {
     case WS_EVT_CONNECT:
-      Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      Serial.printf("[WS] WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
       break;
     case WS_EVT_DISCONNECT:
-      Serial.printf("WebSocket client #%u disconnected\n", client->id());
+      Serial.printf("[WS] WebSocket client #%u disconnected\n", client->id());
       break;
     case WS_EVT_DATA:
       handleWebSocketMessage(arg, data, len, client->id());
@@ -211,7 +202,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
 }
 
 void initWebSocket() {
-  Serial.println("Setting up WebSocket...");
+  Serial.println("[WEBAPP] Setting up WebSocket...");
   ws.onEvent(onEvent);
   server.addHandler(&ws);
 }

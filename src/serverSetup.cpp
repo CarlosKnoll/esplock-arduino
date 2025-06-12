@@ -6,7 +6,7 @@ IPAddress NMask(255, 255, 255, 0);
 String ipMsg;
 
 void setupAP(){  
-  Serial.print("Setting AP (Access Point)…");
+  Serial.print("[SERVER] Setting AP (Access Point)…");
   String string2print = "Setting AP (Access Point)…";
   printMessage(string2print);
   
@@ -18,8 +18,6 @@ void setupAP(){
   WiFi.softAPConfig(Ip, Ip, NMask);
 
   IPAddress IP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(IP);
 
   String ip = IP.toString();
   ipMsg = "Success! " + ip;
@@ -29,23 +27,22 @@ void setupAP(){
 void setupOTAasync(){
   // Start ElegantOTA
   AsyncElegantOTA.begin(&server);
-  Serial.println("OTA started");
+  Serial.println("[SERVER] OTA started");
 }
   
 void beginServer(){
-  Serial.println("Starting server...");
+  Serial.println("[SERVER] Starting server...");
   flagTime = false;
   server.begin();
 }
 
 void setupDNS(){
   if (!MDNS.begin("esplock")) {
-    Serial.println("Error setting up MDNS responder!");
     while (1) {
       delay(500);
     }
   }
-  Serial.println("MDNS started.");
+  Serial.println("[SERVER] MDNS started.");
   MDNS.addService("http", "tcp", 80);
 }
   

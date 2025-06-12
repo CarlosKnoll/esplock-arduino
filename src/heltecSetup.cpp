@@ -6,7 +6,7 @@ struct tm timeinfo;
 String returnTime(){
   // String date = rtc.getTime("%d/%m/%y %T");
   String date = rtc.getTime("%m/%d/%y %T");
-  Serial.println("getTime response: " + date);
+  Serial.println("[ESP32Time] getTime response: " + date);
   return date;
 }
 

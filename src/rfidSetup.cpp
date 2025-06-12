@@ -24,7 +24,6 @@ void setupRFID(){
     // esp_sleep_enable_ext0_wakeup(GPIO_NUM_2, 1);
 
     mfrc522.PCD_DumpVersionToSerial();	// Show details of PCD - MFRC522 Card Reader details
-    Serial.println(F("Scan PICC to see UID, SAK, type, and data blocks..."));
 
 }
 
@@ -124,5 +123,4 @@ String access(){
             return "";
         }
     }
-
 }

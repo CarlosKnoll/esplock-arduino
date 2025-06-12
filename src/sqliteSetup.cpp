@@ -17,26 +17,24 @@ static int callback(void *data, int argc, char **argv, char **azColName) {
     for (i = 0; i<argc; i++){
         message = message + ("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL") + ",";
     }
-    //Serial.printf("\n");
     removeLastChar();
     message += ";";
-    //Serial.println(message);
     return 0;
 }
 
 int db_open(const char *filename, sqlite3 **db) {
    rc = sqlite3_open(filename, db);
    if (rc) {
-       Serial.printf("Can't open database: %s\n", sqlite3_errmsg(*db));
+       Serial.printf("[SQLITE3] Can't open database: %s\n", sqlite3_errmsg(*db));
        return rc;
    } else {
-       Serial.printf("Opened database successfully\n");
+       Serial.printf("[SQLITE3] Opened database successfully\n");
    }
    return rc;
 }
 
 int db_exec(sqlite3 *db, const char *sql) {
-   Serial.println(sql);
+   Serial.println("[SQLITE3] Query:" + String(sql));
    int rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
    if (rc != SQLITE_OK) {
        Serial.printf("SQL error: %s\n", zErrMsg);
@@ -145,7 +143,6 @@ String getData(String numPage, String type){
 
     sqlite3_close(db1);
     removeLastChar();
-    //Serial.println(message);
     returnMessage = "oldestID=" + olderID + ";data=" + message;
     return returnMessage;
 }
