@@ -8,7 +8,7 @@
 
 // -----------------------------------------------
 // Global variables
-// #define BUTTON_PIN GPIO_NUM_2
+#define BUTTON_PIN GPIO_NUM_13
 
 // -----------------------------------------------
 // Function prototypes

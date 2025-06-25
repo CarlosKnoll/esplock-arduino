@@ -96,11 +96,12 @@ String dbAccessCheck(String tag){
 
         sqlite3_close(db1);
 
+        // Actuate relays
         digitalWrite(relay1, HIGH);
-        delay(1000); //temp delay simulating step-up actuation
-        digitalWrite(relay1, LOW);
+        delay(2500); //temp delay simulating step-up actuation
         digitalWrite(relay2, HIGH);
-        delay(2000); //temp delay simulating lock actuation
+        delay(500); //temp delay simulating lock actuation
+        digitalWrite(relay1, LOW);
         digitalWrite(relay2, LOW);
 
         postAccess();
