@@ -98,9 +98,9 @@ String dbAccessCheck(String tag){
 
         // Actuate relays
         digitalWrite(relay1, HIGH);
-        delay(2500); //temp delay simulating step-up actuation
+        delay(delayCharge); //Time to charge the capacitor
         digitalWrite(relay2, HIGH);
-        delay(500); //temp delay simulating lock actuation
+        delay(actuationTime); //Actuation time
         digitalWrite(relay1, LOW);
         digitalWrite(relay2, LOW);
 
