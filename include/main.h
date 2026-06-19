@@ -37,6 +37,7 @@ extern bool stayAwake;
 #include "rfidSetup.h"
 #include "sqliteSetup.h"
 #include "sleepSetup.h"
+#include "actuationSetup.h"
 
 // -----------------------------------------------
 // Function prototypes

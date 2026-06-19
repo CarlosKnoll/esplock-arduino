@@ -5,12 +5,10 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <ESPAsyncWebServer.h>
-
+#include <ArduinoJson.h>
 
 // -----------------------------------------------
 // Global variables
-#define relay1 14
-#define relay2 27
 
 extern size_t content_len;
 

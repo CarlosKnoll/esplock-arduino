@@ -72,6 +72,53 @@ void setupWebPages(){
   server.on("/saida", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", "saida");
   });
+
+// Mobile API endpoint for access check
+server.on("/api/check-access", HTTP_POST, [](AsyncWebServerRequest *request){}, NULL,
+    [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+    
+    // Parse JSON body
+    StaticJsonDocument<1024> doc;
+    DeserializationError error = deserializeJson(doc, (const char*)data);
+    
+    if (error) {
+        request->send(400, "application/json", "{\"error\":\"Invalid JSON\"}");
+        return;
+    }
+    
+    String uid = doc["uid"].as<String>();
+    
+    // Check access using existing function
+    String result = dbAccessCheck(uid);
+    
+    // Build response
+    StaticJsonDocument<1024> response;
+    if (result == "FALSE") {
+        response["granted"] = false;
+    } else {
+        response["granted"] = true;
+        String userName = result.substring(0, result.indexOf(";"));
+        response["name"] = userName;
+    }
+    
+    // Serialize to string
+    String responseStr;
+    serializeJson(response, responseStr);
+    
+    // Send response with CORS header
+    AsyncWebServerResponse *resp = request->beginResponse(200, "application/json", responseStr);
+    resp->addHeader("Access-Control-Allow-Origin", "*");
+    request->send(resp);
+});
+
+// Add CORS preflight handler for the endpoint
+server.on("/api/check-access", HTTP_OPTIONS, [](AsyncWebServerRequest *request){
+    AsyncWebServerResponse *response = request->beginResponse(200);
+    response->addHeader("Access-Control-Allow-Origin", "*");
+    response->addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    response->addHeader("Access-Control-Allow-Headers", "Content-Type");
+    request->send(response);
+});
 }
 
 // -----------------------------------------------

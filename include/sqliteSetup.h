@@ -19,10 +19,6 @@ extern sqlite3 *db1;
 extern int rc;
 extern AsyncWebSocketClient* clientRef;
 
-#define delayCharge 2200 // Time to charge the capacitor in milliseconds
-#define actuationTime 200 // Actuation time in milliseconds
-
-
 // ----------------------------------------------------------------------------
 // Function prototypes
 void removeLastChar();

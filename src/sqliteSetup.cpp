@@ -1,4 +1,5 @@
 #include "sqliteSetup.h"
+#include "actuationSetup.h"
 
 const char* data = "Callback function called";
 char *zErrMsg = 0;
@@ -96,13 +97,9 @@ String dbAccessCheck(String tag){
 
         sqlite3_close(db1);
 
-        // Actuate relays
-        digitalWrite(relay1, HIGH);
-        delay(delayCharge); //Time to charge the capacitor
-        digitalWrite(relay2, HIGH);
-        delay(actuationTime); //Actuation time
-        digitalWrite(relay1, LOW);
-        digitalWrite(relay2, LOW);
+        
+        Serial.println("[ACESS GRANTED] " + usuario + " - " + newAct);
+        actuate_lock();
 
         postAccess();
         return returnMessage;

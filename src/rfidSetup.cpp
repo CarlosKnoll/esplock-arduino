@@ -49,8 +49,6 @@ void checkCard(){
     // Look for new cards
 	if ( ! mfrc522.PICC_IsNewCardPresent()) {
         digitalWrite(led, LOW);
-        digitalWrite(relay1, LOW);
-        digitalWrite(relay2, LOW);
 		return;
 	}
 
@@ -76,8 +74,6 @@ String newCard(){
     id = "";
     if ( ! mfrc522.PICC_IsNewCardPresent()) {
         digitalWrite(led, LOW);
-        digitalWrite(relay1, LOW);
-        digitalWrite(relay2, LOW);
         return "";
 	}
     else{
