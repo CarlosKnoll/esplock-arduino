@@ -76,7 +76,7 @@ String dbAccessCheck(String tag){
         int id = message.toInt() + 1;
 
         message = "";
-        sql = "SELECT act FROM access WHERE name == '" + user + "' ORDER BY date DESC LIMIT 1;";
+        sql = "SELECT act FROM access WHERE name == '" + user + "' ORDER BY id DESC LIMIT 1;";
         rc = db_exec(db1, sql.c_str());
         removeLastChar();
         String lastAct = message;
