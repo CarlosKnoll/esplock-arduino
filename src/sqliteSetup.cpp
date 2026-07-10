@@ -1,207 +1,393 @@
 #include "sqliteSetup.h"
 #include "actuationSetup.h"
 
-const char* data = "Callback function called";
-char *zErrMsg = 0;
-String message;
 sqlite3 *db1;
-int rc;
-AsyncWebSocketClient* clientRef = nullptr;
+int responseCode;
 
-void removeLastChar(){
-    int lc = message.length()-1;
-    message.remove(lc);
-}
+// ----------------------------------------------------------------------------
+// SQL queries definition
+const char *getIdFromUsersQuery =           "SELECT MAX(id) FROM users;";
 
-static int callback(void *data, int argc, char **argv, char **azColName) {
-    int i;
-    for (i = 0; i<argc; i++){
-        message = message + ("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL") + ",";
-    }
-    removeLastChar();
-    message += ";";
-    return 0;
+const char *getIdFromAccessQuery =          "SELECT MAX(id) FROM access;";
+const char *getLastActFromAccessQuery =     "SELECT act FROM access WHERE name = ? ORDER BY id DESC LIMIT 1;";
+
+const char *insertAccessQuery =             "INSERT INTO access VALUES(?, ?, ?, ?, ?);";
+
+const char *getUserDataQuery =              "SELECT * FROM users ORDER BY id ASC LIMIT 1;";
+const char *getUserDataLimQuery =           "SELECT * FROM users ORDER BY id DESC LIMIT 10 OFFSET ?;";
+
+const char *getAccessDataQuery =            "SELECT * FROM access ORDER BY id ASC LIMIT 1;";
+const char *getAccessDataLimQuery =         "SELECT * FROM access ORDER BY id DESC LIMIT 10 OFFSET ?;";
+
+const char *deleteUserQuery =               "DELETE FROM users WHERE id = ?;";
+
+const char *checkUserQuery =                "SELECT IFNULL((SELECT name FROM users WHERE tag = ?),'FALSE');";
+const char *checkTagQuery =                 "SELECT IFNULL((SELECT tag FROM users WHERE tag = ?),'FALSE');";
+
+const char *insertUserQuery =               "INSERT INTO users VALUES(?, ?, ?);";
+
+const char *clearAccessQuery =              "DELETE FROM access;";
+
+const char *getAccessDBQuery =              "SELECT name, tag, date, act FROM access;";
+
+// ----------------------------------------------------------------------------
+// Database prep
+void beginDB() {
+    Serial.println("Initializing DB...");
+    sqlite3_initialize();
 }
 
 int db_open(const char *filename, sqlite3 **db) {
-   rc = sqlite3_open(filename, db);
-   if (rc) {
+   responseCode = sqlite3_open(filename, db);
+   if (responseCode) {
        Serial.printf("[SQLITE3] Can't open database: %s\n", sqlite3_errmsg(*db));
-       return rc;
+       return responseCode;
    } else {
        Serial.printf("[SQLITE3] Opened database successfully\n");
    }
-   return rc;
+   return responseCode;
 }
 
-int db_exec(sqlite3 *db, const char *sql) {
-   Serial.println("[SQLITE3] Query:" + String(sql));
-   int rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
-   if (rc != SQLITE_OK) {
-       Serial.printf("SQL error: %s\n", zErrMsg);
-       sqlite3_free(zErrMsg);
-   } else {
-       Serial.printf("Operation done successfully\n");
-   }
-   return rc;
+void postAccess(){
+    if (stayAwake == false){
+        sleepSetup();
+    }
+    else{
+        msgEspLock1();
+    }
 }
+
+// ----------------------------------------------------------------------------
+// SQL functions
 
 String dbAccessCheck(String tag){
-    dbCheck(tag);
-    String user = message;
-    if (message.equals("FALSE")){
-        sqlite3_close(db1);
-        postAccess();
-        return message;
+    // Initialize insert variables for registration if the access is granted
+    int id = 1; // Initialize id to 1 in case table is empty
+    String user = "FALSE";
+    // Tag is already known from the initial call
+    String date; // Not initialized here, will be set only if access is granted.
+    String newAct = "Entrada"; // Initialize newAct to "Entrada" in case of new users.
+    
+
+    sqlite3_stmt *stmt = nullptr;
+    db_open("/spiffs/users.db", &db1);
+    
+
+    // Check if the tag exists in the users table
+    responseCode = sqlite3_prepare_v2(db1, checkUserQuery, -1, &stmt, nullptr);
+    if (responseCode != SQLITE_OK) {
+        Serial.printf("[SQLITE3] Prepare failed: %s\n", sqlite3_errmsg(db1));
+        goto cleanup;
     }
-    else{
-        String date = returnTime();
-        db_open("/spiffs/users.db", &db1);
-
-        message = "";
-        String sql = "SELECT name FROM users WHERE name == '" + user + "';";
-        rc = db_exec(db1, sql.c_str());
-        removeLastChar();
-        String usuario = message;
-
-        message = "";
-        sql = "SELECT tag FROM users WHERE name == '" + user + "';";
-        rc = db_exec(db1, sql.c_str());
-        removeLastChar();
-        String tag = message;
-
-        message = "";
-        rc = db_exec(db1, "SELECT MAX(id) FROM access;");
-        removeLastChar();
-        int id = message.toInt() + 1;
-
-        message = "";
-        sql = "SELECT act FROM access WHERE name == '" + user + "' ORDER BY id DESC LIMIT 1;";
-        rc = db_exec(db1, sql.c_str());
-        removeLastChar();
-        String lastAct = message;
-
-        //entry or exit?
-        String newAct;
-        if (lastAct == "Entrada"){
-            newAct = "Saída";
+    sqlite3_bind_text(stmt, 1, tag.c_str(), -1, SQLITE_TRANSIENT);
+    responseCode = sqlite3_step(stmt);
+    if (responseCode == SQLITE_ROW) {
+        const unsigned char *text = sqlite3_column_text(stmt, 0);
+        if (text) {
+            user = String((const char *)text);
         }
-        else{
-            newAct = "Entrada";
-        }
-        String returnMessage = usuario + ";" + tag;
-
-        sql = "INSERT INTO access VALUES(" + String(id) + ", '" + String(usuario) + "', '" + String(tag) + "', '" + String(date) + "', '" + String(newAct) + "');";
-        rc = db_exec(db1, sql.c_str());
-        removeLastChar();
-
-        sqlite3_close(db1);
-
-        
-        Serial.println("[ACESS GRANTED] " + usuario + " - " + newAct);
-        actuate_lock();
-
-        postAccess();
-        return returnMessage;
+    } else {
+        Serial.printf("[SQLITE3] Step failed: %s\n", sqlite3_errmsg(db1));
     }
+    sqlite3_finalize(stmt);
+    stmt = nullptr;
+
+
+    if (user == "FALSE") { // If tag is not in the database, return early
+        Serial.println("[ACCESS DENIED] Tag not found in database.");
+        goto cleanup;
+    }
+
+
+    date = returnTime(); // If not return early, access is granted, date is set.
+
+    // Query to get the next row ID for access registering
+    responseCode = sqlite3_prepare_v2(db1, getIdFromAccessQuery, -1, &stmt, nullptr);
+    if (responseCode != SQLITE_OK) {
+        Serial.printf("[SQLITE3] Prepare failed: %s\n", sqlite3_errmsg(db1));
+        goto cleanup;
+    }
+    responseCode = sqlite3_step(stmt);
+    if (responseCode == SQLITE_ROW) {
+        const unsigned char *text = sqlite3_column_text(stmt, 0);
+        if (text) {
+            id = String((const char *)text).toInt() + 1;
+        }
+    } else {
+        Serial.printf("[SQLITE3] Step failed: %s\n", sqlite3_errmsg(db1));
+    }
+    sqlite3_finalize(stmt);
+    stmt = nullptr;
+
+
+    // Query to get last action and flip it for new action
+    responseCode = sqlite3_prepare_v2(db1, getLastActFromAccessQuery, -1, &stmt, nullptr);
+    if (responseCode != SQLITE_OK) {
+        Serial.printf("[SQLITE3] Prepare failed: %s\n", sqlite3_errmsg(db1));
+        goto cleanup;
+    }
+    sqlite3_bind_text(stmt, 1, user.c_str(), -1, SQLITE_TRANSIENT);
+    responseCode = sqlite3_step(stmt);
+    if (responseCode == SQLITE_ROW) {
+        const unsigned char *text = sqlite3_column_text(stmt, 0);
+        if (text) {
+            newAct = (String((const char *)text) == "Entrada") ? "Saída" : "Entrada";
+        }
+    } else if (responseCode != SQLITE_DONE) {
+        Serial.printf("[SQLITE3] Step failed: %s\n", sqlite3_errmsg(db1));
+    }
+    sqlite3_finalize(stmt);
+    stmt = nullptr;
+
+    
+    // Final insert query to register the access
+    responseCode = sqlite3_prepare_v2(db1, insertAccessQuery, -1, &stmt, nullptr);
+    if (responseCode != SQLITE_OK) {
+        Serial.printf("[SQLITE3] Prepare failed: %s\n", sqlite3_errmsg(db1));
+        goto cleanup;
+    }
+    sqlite3_bind_int(stmt, 1, id);
+    sqlite3_bind_text(stmt, 2, user.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, tag.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 4, date.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 5, newAct.c_str(), -1, SQLITE_TRANSIENT);
+    responseCode = sqlite3_step(stmt);
+    if (responseCode != SQLITE_DONE) {
+        Serial.printf("[SQLITE3] Insert failed: %s\n", sqlite3_errmsg(db1));
+        goto cleanup;
+    }
+
+    // Feedback and actuation
+    Serial.println("[ACCESS GRANTED] " + user + " - " + newAct);
+    actuate_lock();
+
+
+    cleanup:
+        if (stmt) {sqlite3_finalize(stmt); stmt = nullptr;}
+        if (db1)  {sqlite3_close(db1); db1 = nullptr;}
+        postAccess();
+        return (user == "FALSE") ? "FALSE" : (user + ";" + tag); // Return user;tag if access granted, else return FALSE string
 }
 
-    // error handler
-    // if (rc != SQLITE_OK) {
-    //     sqlite3_close(db1);
-    //     return;
-    // }
+
 String getData(String numPage, String type){
-    String returnMessage = "";
-    String sql = "";
     String olderID = "";
+    String data = "";
     int offset = ((numPage.toInt()) - 1) * 10;
 
-    message = "";
+
+    sqlite3_stmt *stmt = nullptr;
+    db_open("/spiffs/users.db", &db1);
+    
+    if(type == "users"){ // Build up the response data for users table
+        responseCode = sqlite3_prepare_v2(db1, getUserDataQuery, -1, &stmt, nullptr);
+        if (responseCode != SQLITE_OK) {
+            Serial.printf("[SQLITE3] Prepare failed: %s\n", sqlite3_errmsg(db1));
+            goto cleanup;
+        }
+        responseCode = sqlite3_step(stmt);
+        if (responseCode == SQLITE_ROW) {
+            const unsigned char *text = sqlite3_column_text(stmt, 0);
+            if (text) {
+                olderID = String((const char *)text); 
+            }
+        } else if (responseCode != SQLITE_DONE) {
+            Serial.printf("[SQLITE3] Step failed: %s\n", sqlite3_errmsg(db1));
+            goto cleanup;
+        }
+        sqlite3_finalize(stmt);
+        stmt = nullptr;
+
+
+        responseCode = sqlite3_prepare_v2(db1, getUserDataLimQuery, -1, &stmt, nullptr);
+        if (responseCode != SQLITE_OK) {
+            Serial.printf("[SQLITE3] Prepare failed: %s\n", sqlite3_errmsg(db1));
+            goto cleanup;
+        }
+        sqlite3_bind_int(stmt, 1, offset);
+
+        while ((responseCode = sqlite3_step(stmt)) == SQLITE_ROW) {
+            int cols = sqlite3_column_count(stmt);
+            for (int i = 0; i < cols; i++) {
+                const unsigned char *text = sqlite3_column_text(stmt, i);
+                data += text ? String((const char *)text) : "";
+                if (i < cols - 1) data += ",";
+            }
+            data += ";";
+        }
+        if (data.length() > 0) {
+            data.remove(data.length() - 1); // drop trailing ';'
+        }
+        if (responseCode != SQLITE_DONE) {
+            Serial.printf("[SQLITE3] Step failed: %s\n", sqlite3_errmsg(db1));
+            goto cleanup;
+        }
+
+        sqlite3_finalize(stmt);
+        stmt = nullptr;
+
+    }
+    else if(type == "access"){ // Build up the response data for users table
+        responseCode = sqlite3_prepare_v2(db1, getAccessDataQuery, -1, &stmt, nullptr);
+        if (responseCode != SQLITE_OK) {
+            Serial.printf("[SQLITE3] Prepare failed: %s\n", sqlite3_errmsg(db1));
+            goto cleanup;
+        }
+        responseCode = sqlite3_step(stmt);
+        if (responseCode == SQLITE_ROW) {
+            const unsigned char *text = sqlite3_column_text(stmt, 0);
+            if (text) {
+                olderID = String((const char *)text);
+            }
+        } else if (responseCode != SQLITE_DONE) {
+            Serial.printf("[SQLITE3] Step failed: %s\n", sqlite3_errmsg(db1));
+            goto cleanup;
+        }
+        sqlite3_finalize(stmt);
+        stmt = nullptr;
+
+
+        responseCode = sqlite3_prepare_v2(db1, getAccessDataLimQuery, -1, &stmt, nullptr);
+        if (responseCode != SQLITE_OK) {
+            Serial.printf("[SQLITE3] Prepare failed: %s\n", sqlite3_errmsg(db1));
+            goto cleanup;
+        }
+        sqlite3_bind_int(stmt, 1, offset);
+
+        while ((responseCode = sqlite3_step(stmt)) == SQLITE_ROW) {
+            int cols = sqlite3_column_count(stmt);
+            for (int i = 0; i < cols; i++) {
+                const unsigned char *text = sqlite3_column_text(stmt, i);
+                data += text ? String((const char *)text) : "";
+                if (i < cols - 1) data += ",";
+            }
+            data += ";";
+        }
+        if (data.length() > 0) {
+            data.remove(data.length() - 1); // drop trailing ';'
+        }
+        if (responseCode != SQLITE_DONE) {
+            Serial.printf("[SQLITE3] Step failed: %s\n", sqlite3_errmsg(db1));
+            goto cleanup;
+        }
+    }
+
+    cleanup:
+        if (stmt) {sqlite3_finalize(stmt); stmt = nullptr;}
+        if (db1)  {sqlite3_close(db1); db1 = nullptr;}
+        return (olderID == "") ? "empty" : ("oldestID=" + olderID + ";data=" + data);
+}
+
+
+bool addUser(String usuario, String tag){
+    bool tagExists = false;
+    int id = 1; // Initialize id to 1 in case table is empty
+
+    sqlite3_stmt *stmt = nullptr;
     db_open("/spiffs/users.db", &db1);
 
-    if(type == "users"){
-        sql = "SELECT * FROM users ORDER BY id ASC LIMIT 1;";
-        rc = db_exec(db1, sql.c_str());
-        olderID = message.substring(0, message.indexOf(","));
-
-        message = "";
-        sql = "SELECT * FROM users ORDER BY id DESC LIMIT 10 OFFSET " + String(offset) + ";";
-        rc = db_exec(db1, sql.c_str());
+    responseCode = sqlite3_prepare_v2(db1, checkTagQuery, -1, &stmt, nullptr);
+    if (responseCode != SQLITE_OK) {
+        Serial.printf("[SQLITE3] Prepare failed: %s\n", sqlite3_errmsg(db1));
+        goto cleanup;
     }
-    else if(type == "access"){
-        sql = "SELECT * FROM access ORDER BY id ASC LIMIT 1;";
-        rc = db_exec(db1, sql.c_str());
-        olderID = message.substring(0, message.indexOf(","));
+    sqlite3_bind_text(stmt, 1, tag.c_str(), -1, SQLITE_TRANSIENT);
+    responseCode = sqlite3_step(stmt);
+    if (responseCode == SQLITE_ROW) {
+        const unsigned char *text = sqlite3_column_text(stmt, 0);
+        if (text) {
+            tagExists = (String((const char *)text) == tag) ? true : false;
+        }
+    } else if (responseCode != SQLITE_DONE) {
+        Serial.printf("[SQLITE3] Step failed: %s\n", sqlite3_errmsg(db1));
+        goto cleanup;
+    }
+    sqlite3_finalize(stmt);
+    stmt = nullptr;
 
-        message = "";
-        sql = "SELECT * FROM access ORDER BY id DESC LIMIT 10 OFFSET " + String(offset) + ";";
-        rc = db_exec(db1, sql.c_str());
+    if (!tagExists) { // If tag does not exist, proceed to insert the new user
+        responseCode = sqlite3_prepare_v2(db1, getIdFromUsersQuery, -1, &stmt, nullptr);
+        if (responseCode != SQLITE_OK) {
+            Serial.printf("[SQLITE3] Prepare failed: %s\n", sqlite3_errmsg(db1));
+            goto cleanup;
+        }
+        responseCode = sqlite3_step(stmt);
+        if (responseCode == SQLITE_ROW) {
+            const unsigned char *text = sqlite3_column_text(stmt, 0);
+            if (text) {
+                id = String((const char *)text).toInt() + 1;
+            }
+        } else if (responseCode != SQLITE_DONE) {
+            Serial.printf("[SQLITE3] Step failed: %s\n", sqlite3_errmsg(db1));
+            goto cleanup;
+        }
+        sqlite3_finalize(stmt);
+        stmt = nullptr;
+
+        responseCode = sqlite3_prepare_v2(db1, insertUserQuery, -1, &stmt, nullptr);
+        if (responseCode != SQLITE_OK) {
+            Serial.printf("[SQLITE3] Prepare failed: %s\n", sqlite3_errmsg(db1));
+            goto cleanup;
+        }
+        sqlite3_bind_int(stmt, 1, id);
+        sqlite3_bind_text(stmt, 2, usuario.c_str(), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(stmt, 3, tag.c_str(), -1, SQLITE_TRANSIENT);
+        responseCode = sqlite3_step(stmt);
+        if (responseCode != SQLITE_DONE) {
+            Serial.printf("[SQLITE3] Insert failed: %s\n", sqlite3_errmsg(db1));
+            goto cleanup;
+        }
     }
 
-    sqlite3_close(db1);
-    removeLastChar();
-    returnMessage = "oldestID=" + olderID + ";data=" + message;
-    return returnMessage;
+    cleanup:
+        if (stmt) {sqlite3_finalize(stmt); stmt = nullptr;}
+        if (db1)  {sqlite3_close(db1); db1 = nullptr;}
+        return tagExists;
 }
+
 
 void removeUser(int idDelete){
+    sqlite3_stmt *stmt = nullptr;
     db_open("/spiffs/users.db", &db1);
-    String sql = "DELETE FROM users WHERE id = " + String(idDelete) + ";";
-    rc = db_exec(db1, sql.c_str());
-    sqlite3_close(db1);
-}
-
-void dbCheck(String id){
-    message = "";
-    db_open("/spiffs/users.db", &db1);
-    String sql = "SELECT IFNULL((SELECT name FROM users WHERE tag == '" + String(id) + "'),'FALSE');";
-    rc = db_exec(db1, sql.c_str());
-    removeLastChar();
-
-    if (message.equals("FALSE")){
-        printMessage("Usuário não cadastrado");
-    }  
-    else{
-        printMessage("Bem vindo(a)\n" + message);
-    }
-    sqlite3_close(db1);
     
-}
 
-int checkTag(String id){
-    message = "";
-    db_open("/spiffs/users.db", &db1);
-    String sql = "SELECT IFNULL((SELECT tag FROM users WHERE tag == '" + id + "'),'FALSE');";
-    rc = db_exec(db1, sql.c_str());
-    removeLastChar();
-    sqlite3_close(db1);
-    if (message.equals("FALSE")){
-        return 1;
-    }  
-    else{
-        return 0;
+    responseCode = sqlite3_prepare_v2(db1, deleteUserQuery, -1, &stmt, nullptr);
+    if (responseCode != SQLITE_OK) {
+        Serial.printf("[SQLITE3] Prepare failed: %s\n", sqlite3_errmsg(db1));
+        goto cleanup;
     }
+    sqlite3_bind_int(stmt, 1, idDelete);
+    responseCode = sqlite3_step(stmt);
+    if (responseCode != SQLITE_DONE) {
+        Serial.printf("[SQLITE3] Step failed: %s\n", sqlite3_errmsg(db1));
+    }
+
+    cleanup:
+        if (stmt) {sqlite3_finalize(stmt); stmt = nullptr;}
+        if (db1)  {sqlite3_close(db1); db1 = nullptr;}
 }
 
-void addUser(String usuario, String tag){
-    message = "";
-    db_open("/spiffs/users.db", &db1);
-    rc = db_exec(db1, "SELECT MAX(id) FROM users;");
-    removeLastChar();
-    id = message.toInt() + 1;
-    String sql = "INSERT INTO users VALUES(" + String(id) + ", '" + String(usuario) + "', '" + String(tag) + "');";
-    rc = db_exec(db1, sql.c_str());
-    sqlite3_close(db1);
-}
 
 void clearDB(){
-    message = "";
-    sqlite3_close(db1);
+    sqlite3_stmt *stmt = nullptr;
     db_open("/spiffs/users.db", &db1);
-    rc = db_exec(db1, "DELETE FROM access");
-    sqlite3_close(db1);
+    
+
+    responseCode = sqlite3_prepare_v2(db1, clearAccessQuery, -1, &stmt, nullptr);
+    if (responseCode != SQLITE_OK) {
+        Serial.printf("[SQLITE3] Prepare failed: %s\n", sqlite3_errmsg(db1));
+        goto cleanup;
+    }
+    responseCode = sqlite3_step(stmt);
+    if (responseCode != SQLITE_DONE) {
+        Serial.printf("[SQLITE3] Step failed: %s\n", sqlite3_errmsg(db1));
+    }
+
+    cleanup:
+        if (stmt) {sqlite3_finalize(stmt); stmt = nullptr;}
+        if (db1)  {sqlite3_close(db1); db1 = nullptr;}
 }
+
 
 void getDBAsync(uint32_t client) {
     xTaskCreatePinnedToCore(
@@ -218,72 +404,47 @@ void getDBAsync(uint32_t client) {
 void buildCSVTask(void* param) {
     uint32_t client = (uint32_t)param;
 
-    String csv = getDB();
-
-    if (client) {
-        notifyUserData("csv", csv, "individual", client);
-    }
-
-    vTaskDelete(NULL);  // Don't forget this!
-}
-
-String getDB(){
-    message = "";
-    sqlite3_close(db1);
-    db_open("/spiffs/users.db", &db1);
-    rc = db_exec(db1, "SELECT name, tag, date, act FROM access;");
-    sqlite3_close(db1);
-
     // Start with UTF-8 BOM
     String csv = "\xEF\xBB\xBF";  // BOM
     csv += "Usuário,TAG,Data,Ação\n";
 
-    // Format message content into CSV
-    int col = 0;
-    String field = "";
-    for (int i = 0; i < message.length(); ) {
-        field = "";
-        // Extract each field until comma or semicolon
-        while (i < message.length() && message.charAt(i) != ',' && message.charAt(i) != ';') {
-            field += message.charAt(i++);
-        }
-    
-        // Reformat date if it's the third column
-        if (col == 2 && field.length() >= 17) {  // MM/DD/YY HH:mm:ss
-            String mm = field.substring(0, 2);
-            String dd = field.substring(3, 5);
-            String yy = field.substring(6, 8);
-            String time = field.substring(9);
-            field = dd + "/" + mm + "/20" + yy + " " + time;
-        }
-    
-        csv += field;
-        yield(); // Allow other tasks to run
-    
-        if (message.charAt(i) == ';') {
-            csv += '\n';
-            col = 0;
-        } else {
-            csv += ',';
-            col++;
-        }
-    
-        i++; // skip the comma or semicolon
+    sqlite3_stmt *stmt = nullptr;
+    db_open("/spiffs/users.db", &db1);
+
+    responseCode = sqlite3_prepare_v2(db1, getAccessDBQuery, -1, &stmt, nullptr);
+    if (responseCode != SQLITE_OK) {
+        Serial.printf("[SQLITE3] Prepare failed: %s\n", sqlite3_errmsg(db1));
+        goto cleanup;
     }
 
-    return csv;
-}
+    while ((responseCode = sqlite3_step(stmt)) == SQLITE_ROW) {
+        int cols = sqlite3_column_count(stmt);
+        for (int i = 0; i < cols; i++) {
+            const unsigned char *text = sqlite3_column_text(stmt, i);
+            String field = text ? String((const char *)text) : "";
 
-void postAccess(){
-    if (stayAwake == false){
-        sleepSetup();
-    }
-    else{
-        msgEspLock1();
-    }
-}
+            // Column 2 is "date" (name, tag, date, act) — reformat MM/DD/YY -> DD/MM/YYYY
+            if (i == 2 && field.length() >= 17) {
+                String mm = field.substring(0, 2);
+                String dd = field.substring(3, 5);
+                String yy = field.substring(6, 8);
+                String time = field.substring(9);
+                field = dd + "/" + mm + "/20" + yy + " " + time;
+            }
 
-void beginDB() {
-    Serial.println("Initializing DB...");
-    sqlite3_initialize();
+            csv += field;
+            if (i < cols - 1) csv += ',';
+        }
+        csv += '\n';
+        yield(); // let other tasks run between rows
+    }
+    if (responseCode != SQLITE_DONE) {
+        Serial.printf("[SQLITE3] Step failed: %s\n", sqlite3_errmsg(db1));
+    }
+
+    cleanup:
+        if (stmt) {sqlite3_finalize(stmt); stmt = nullptr;}
+        if (db1)  {sqlite3_close(db1); db1 = nullptr;}
+        if (client) notifyUserData("csv", csv, "individual", client);
+        vTaskDelete(NULL); 
 }

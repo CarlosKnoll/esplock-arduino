@@ -31,7 +31,6 @@ extern String user;
 // Function prototypes
 void setupRFID();
 void printHex(byte *buffer, byte bufferSize);
-void checkCard();
 String newCard();
 bool checkForCard();
 void updateStatus( String message );

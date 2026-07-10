@@ -27,6 +27,7 @@ extern bool stayAwake;
 
 #define led 25
 #define wakeMonitor 12
+#define wakeupPin 13
 
 // -----------------------------------------------
 // Inclusion of custom header files

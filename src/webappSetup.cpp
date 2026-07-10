@@ -175,14 +175,9 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t clien
       String message = (char*)data;
       String newUser = message.substring(message.indexOf("User=") + 5, message.indexOf("ID=") - 1);
       String newID = message.substring(message.indexOf("ID=") + 3);
-      int availableTag = checkTag(newID);
-      if (availableTag == 0){
-        notifyError();
-      }
-      else{
-        addUser(newUser, newID);
-        notifyUserData("success", "add", "all", client);
-      }
+      bool availableTag = addUser(newUser, newID);
+      if (availableTag) notifyError();
+      else notifyUserData("success", "add", "all", client);
     }
 
     //Test for messages from access webpage

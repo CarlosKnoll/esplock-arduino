@@ -12,31 +12,51 @@
 
 // ----------------------------------------------------------------------------
 // Global variables
-extern const char* data;
-extern char *zErrMsg;
-extern String message;
 extern sqlite3 *db1;
-extern int rc;
-extern AsyncWebSocketClient* clientRef;
+extern int responseCode;
+
+// SQL queries
+extern const char *getIdFromUsersQuery;
+
+extern const char *getIdFromAccessQuery;
+extern const char *getLastActFromAccessQuery;
+
+extern const char *insertAccessQuery;
+
+extern const char *getUserDataQuery;
+extern const char *getUserDataLimQuery;
+extern const char *getAccessDataQuery;
+extern const char *getAccessDataLimQuery;
+
+extern const char *deleteUserQuery;
+extern const char *checkUserQuery;
+extern const char *checkTagQuery;
+
+extern const char *insertUserQuery;
+
+extern const char *clearAccessQuery;
+
+extern const char *getAcessDBQuery;
+
 
 // ----------------------------------------------------------------------------
 // Function prototypes
-void removeLastChar();
-static int callback(void *data, int argc, char **argv, char **azColName);
+void beginDB();
 int db_open(const char *filename, sqlite3 **db);
-int db_exec(sqlite3 *db, const char *sql);
+void postAccess();
+
+
 String dbAccessCheck(String tag);
 String getData(String numPage, String type);
+
+bool addUser(String usuario, String tag);
+
 void removeUser(int idDelete);
-void dbCheck(String id);
-int checkTag(String id);
-void addUser(String usuario, String tag);
+
 void clearDB();
-String getDB();
-void buildCSVTask(void* param);
+
 void getDBAsync(uint32_t client);
-void postAccess();
-void beginDB();
+void buildCSVTask(void* param);
 
 
 #endif

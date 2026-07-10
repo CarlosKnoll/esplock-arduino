@@ -25,7 +25,7 @@ void setup(void){
         case ESP_SLEEP_WAKEUP_TIMER:
             stayAwake = false;
             Serial.println("[WAKE] Woke up by timer. Checking for card...");
-            if (digitalRead(GPIO_NUM_13) == LOW) {
+            if (digitalRead(wakeupPin) == LOW) {
                 stayAwake = true;
                 initializeModules(0);
                 delay(10);

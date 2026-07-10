@@ -44,32 +44,6 @@ bool checkForCard(){
     return true;
 }
 
-void checkCard(){
-    id = "";
-    // Look for new cards
-	if ( ! mfrc522.PICC_IsNewCardPresent()) {
-        digitalWrite(led, LOW);
-		return;
-	}
-
-    digitalWrite(led, HIGH);
-	// Select one of the cards
-	if ( ! mfrc522.PICC_ReadCardSerial()) {
-		return;
-	}
-
-    for (byte i = 0; i < 4; i++) {
-        UID[i] = mfrc522.uid.uidByte[i];
-    }
-    printHex(mfrc522.uid.uidByte, mfrc522.uid.size);
-
-
-    dbCheck(id);
-
-    mfrc522.PICC_HaltA();
-    mfrc522.PCD_StopCrypto1();
-}
-
 String newCard(){
     id = "";
     if ( ! mfrc522.PICC_IsNewCardPresent()) {
@@ -88,8 +62,6 @@ String newCard(){
         UID[i] = mfrc522.uid.uidByte[i];
     }
     printHex(mfrc522.uid.uidByte, mfrc522.uid.size);
-
-    dbCheck(id);
 
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
