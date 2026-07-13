@@ -36,7 +36,7 @@ void beginServer(){
 }
 
 void setupDNS(){
-  if (!MDNS.begin("esplock")) {
+  if (!MDNS.begin("esplock")) { // Start the mDNS responder for esplock.local for ease of access
     while (1) {
       delay(500);
     }
