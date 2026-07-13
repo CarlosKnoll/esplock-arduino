@@ -25,6 +25,11 @@ void setupWebPages(){
       request->send(SPIFFS, "/access.csv", "text/plain", true); //csv for downloading the database
   }); 
 
+  // Helper scripts
+  server.on("/scripts/timesync.js", HTTP_GET, [](AsyncWebServerRequest *request) {
+      request->send(SPIFFS, "/scripts/timesync.js", "text/javascript"); // javascript for time synchronization
+  });
+
   // Main webpage
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(200, "text/html", "<meta http-equiv=\"refresh\" content=\"0; URL='./main'\"/>"); // Redirect of root to /main
@@ -228,6 +233,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
   switch (type) {
     case WS_EVT_CONNECT:
       Serial.printf("[WS] WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      ws.text(client->id(), "requestEpoch"); // Force-request epoch for any client connection
       break;
     case WS_EVT_DISCONNECT:
       Serial.printf("[WS] WebSocket client #%u disconnected\n", client->id());
