@@ -27,6 +27,7 @@ void setup(void){
             Serial.println("[WAKE] Woke up by timer. Checking for card...");
             if (digitalRead(wakeupPin) == LOW) {
                 stayAwake = true;
+                flagTime = true;
                 initializeModules(0);
                 delay(10);
                 break;
@@ -75,12 +76,20 @@ void loop(void){
         }
         user = "";
     }
+
+    // If detected button press and timestamp is updated, go to sleep
+    if (digitalRead(wakeupPin) == LOW && flagTime) {
+        Serial.println("[SLEEP] Button pressed. Going to sleep...");
+        sleepSetup();
+    }
 }
 
 // -----------------------------------------------
 
 void initializeModules(int moduleControl){
     pinMode(led, OUTPUT);
+    wakeButtonSetup();
+
     setupHeltec();
     beginDB();
     setupMotor();

@@ -211,11 +211,9 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, uint32_t clien
 
     //Test for time update
     if (strstr((char*)data, "epoch") != NULL) { //If message contains epoch
-      if (flagTime == false){
-        timeUpdate(data);
-        flagTime = true;
-        printMessage("ESPLOCK");
-      } 
+      timeUpdate(data);
+      flagTime = true;
+      printMessage("ESPLOCK");
     }
 
     //Test for deep sleep request

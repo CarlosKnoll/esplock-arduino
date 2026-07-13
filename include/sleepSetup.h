@@ -13,5 +13,6 @@
 // -----------------------------------------------
 // Function prototypes
 void sleepSetup();
+void wakeButtonSetup();
 
 #endif

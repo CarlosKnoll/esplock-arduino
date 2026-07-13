@@ -32,7 +32,6 @@ void setupOTAasync(){
   
 void beginServer(){
   Serial.println("[SERVER] Starting server...");
-  flagTime = false;
   server.begin();
 }
 
