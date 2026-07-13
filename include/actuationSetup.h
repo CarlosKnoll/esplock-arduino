@@ -16,6 +16,8 @@
 #define MOTOR_CH1 0
 #define MOTOR_CH2 1
 
+
+void dvrSleep(bool actuate);
 void setupMotor();
 void motorBrake();
 void motorCoast();

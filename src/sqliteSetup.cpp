@@ -54,6 +54,7 @@ void postAccess(){
     }
     else{
         msgEspLock1();
+        dvrSleep(true);
     }
 }
 
@@ -159,6 +160,7 @@ String dbAccessCheck(String tag){
 
     // Feedback and actuation
     Serial.println("[ACCESS GRANTED] " + user + " - " + newAct);
+    dvrSleep(false);
     actuate_lock();
 
 

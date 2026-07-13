@@ -9,10 +9,11 @@
 // -----------------------------------------------
 // Global variables
 #define BUTTON_PIN GPIO_NUM_13
+#define DVRSLEEP_PIN GPIO_NUM_14
 
 // -----------------------------------------------
 // Function prototypes
 void sleepSetup();
-void wakeButtonSetup();
+void sleepButtonsSetup();
 
 #endif

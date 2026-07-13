@@ -6,15 +6,19 @@ bool stayAwake = false;
 
 // -----------------------------------------------
 void setup(void){
+    Serial.begin(115200);
+
     //On top of future SLEEP pin, safeguard on driver pins
     pinMode(direction1, OUTPUT);
     pinMode(direction2, OUTPUT);
 
+    sleepButtonsSetup();        // Setup sleep buttons
+    dvrSleep(true);             // Put DVR to sleep
+    
     //Monitor pin for data gathering of esps wake cycle
     pinMode(wakeMonitor, OUTPUT);
     digitalWrite(wakeMonitor, HIGH);
 
-    Serial.begin(115200);
     setupRFID();                // Initialize RFID reader, which decides next actions
     
     bool cardDetected = checkForCard();
@@ -36,11 +40,12 @@ void setup(void){
                     sleepSetup();
                     break;
                 } else { // If card is detected, initialize modules for logging access, then go to sleep
-                    Serial.println("[WAKE] Card found. Staying awake.");
+                    Serial.println("[WAKE] Card found. Checking credentials.");
                     initializeModules(1);
                     access();
                 break;
             }
+        }
 
         default: // Fresh boot or unknown wakeup reason
             stayAwake = true; // Forcing stayAwake to true to allow for time update
@@ -48,7 +53,6 @@ void setup(void){
             initializeModules(0);
             printMessage("ESPLOCK reiniciado.\n Atualize o horario.");
             break;
-        }
     }
 }
 
@@ -87,7 +91,6 @@ void loop(void){
 
 void initializeModules(int moduleControl){
     pinMode(led, OUTPUT);
-    wakeButtonSetup();          // Setup wake button with pull-up resistor and deinit RTC control
 
     setupHeltec();              // Initialize Heltec display and SPIFFS
     beginDB();                  // Initialize SQLite database

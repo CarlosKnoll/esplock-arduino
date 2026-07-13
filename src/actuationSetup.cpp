@@ -1,10 +1,19 @@
 #include "actuationSetup.h"
+#include "sleepSetup.h"
+
+void dvrSleep(bool sleep) {
+    if (sleep){
+        digitalWrite(DVRSLEEP_PIN, LOW);
+    } else{
+        digitalWrite(DVRSLEEP_PIN, HIGH);
+    }
+}
 
 void setupMotor() {
     ledcSetup(0, PWM_FREQ, 8);  // channel 0, freq, 8-bit resolution
     ledcSetup(1, PWM_FREQ, 8);  // channel 1
-    ledcAttachPin(direction1, 0);  // GPIO32 → channel 0
-    ledcAttachPin(direction2, 1);  // GPIO33 → channel 1
+    ledcAttachPin(direction1, 0);  // GPIO2  → channel 0
+    ledcAttachPin(direction2, 1);  // GPIO17 → channel 1
     ledcWrite(0, 0);
     ledcWrite(1, 0);
     Serial.println("[MOTOR] LEDC attached on GPIO" + String(direction1) + " and GPIO" + String(direction2));
